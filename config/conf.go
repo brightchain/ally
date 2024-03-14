@@ -8,7 +8,7 @@ type AppConfig struct {
 
 type App struct {
 	Name string `json:"name"`
-	Port int    `json:"port"`
+	Port string `json:"port"`
 }
 
 type Mysql struct {

@@ -3,6 +3,7 @@ package controllers
 import (
 	"ally/config"
 	"ally/utils"
+	"ally/utils/logging"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -18,6 +19,7 @@ func Index(c *gin.Context) {
 func Xinhua(c *gin.Context) {
 	at := c.Query("at")
 	if at != "sfdjwie2ji239324" {
+		logging.Error("非法访问")
 		c.String(200, "非法访问")
 		return
 	}

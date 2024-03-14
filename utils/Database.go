@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"ally/utils/logging"
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -13,8 +13,8 @@ func GetDb(host string, port int, username string, password string, database str
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true&loc=Local&timeout=8s", username, password, host, port, database)
 	Db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		log.Printf("数据库链接配置出错:%s\n", err.Error())
-		return Db, err
+		logging.Error("mysql lost", err)
+		return nil, err
 	}
 	// 设置连接池中空闲连接的最大数量。
 	Db.SetMaxIdleConns(1)
@@ -27,8 +27,8 @@ func GetDb(host string, port int, username string, password string, database str
 
 	err = Db.Ping()
 	if err != nil {
-		log.Printf("数据库连接出错：%s\n", err.Error())
-		return Db, err
+		logging.Error("mysql lost", err)
+		return nil, err
 	}
 
 	return Db, err
@@ -37,11 +37,11 @@ func GetDb(host string, port int, username string, password string, database str
 
 func QueryOne(Db *sql.DB, query string) map[string]string {
 	rows, err := Db.Query(query)
-	defer rows.Close()
 	if err != nil {
-		log.Printf("数据查询出错！sql:%s\n错误原因：%s", query, err.Error())
-		return nil
+		logging.Error("mysql lost: %v", err)
+		panic(err)
 	}
+	defer rows.Close()
 
 	cols, _ := rows.Columns()
 	if len(cols) > 1 {
@@ -70,11 +70,11 @@ func QueryOne(Db *sql.DB, query string) map[string]string {
 
 func QueryAll(Db *sql.DB, query string) []map[string]string {
 	rows, err := Db.Query(query)
-	defer rows.Close()
 	if err != nil {
-		log.Printf("数据查询出错！sql:%s\n错误原因：%s", query, err.Error())
-		return nil
+		logging.Error("mysql lost: %v", err)
+		panic(err)
 	}
+	defer rows.Close()
 	cols, _ := rows.Columns()
 	if len(cols) > 1 {
 		var ret []map[string]string
@@ -99,10 +99,10 @@ func QueryAll(Db *sql.DB, query string) []map[string]string {
 
 func GetRows(Db *sql.DB, query string) *sql.Rows {
 	rows, err := Db.Query(query)
-	defer rows.Close()
 	if err != nil {
-		log.Printf("数据查询出错！sql:%s\n错误原因：%s", query, err.Error())
-		return nil
+		logging.Error("mysql lost: %v", err)
+		panic(err)
 	}
+	defer rows.Close()
 	return rows
 }
