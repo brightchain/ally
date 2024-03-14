@@ -1,13 +1,14 @@
-## Gweb - 基于gin开发的web服务框架
+## Ally - 基于gin开发的web服务框架
 
 ## Features
 - excel数据导出
+- 文件压缩
 - 图像处理（压缩、剪切、合成）开发中...
 - 配置文件热加载
 - 后台管理功能 开发中...
 
 ## Installation
-- 下载源码：git clone https://github.com/chenbinhua/gweb.git
+- 下载源码：git clone https://github.com/chenbinhua/ally.git
 - 下载依赖：go mod tidy
 - 运行项目：go run main.go
 
