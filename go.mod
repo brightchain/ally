@@ -1,4 +1,4 @@
-module h5
+module ally
 
 go 1.21.1
 

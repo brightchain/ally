@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"h5/controllers"
+	"ally/controllers"
 
 	"github.com/gin-gonic/gin"
 )

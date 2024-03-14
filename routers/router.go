@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"h5/config"
+	"ally/config"
 
 	"github.com/gin-gonic/gin"
 )
