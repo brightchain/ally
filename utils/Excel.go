@@ -35,7 +35,6 @@ func Down[T any](data []T, filename string, c *gin.Context) {
 	}
 	header := getHeaders(&v0)
 	_ = f.SetSheetRow(sheetName, "A1", &header)
-	_ = f.SetRowHeight(sheetName, 1, 30)
 
 	rowNum := 1 //数据开始行数
 	for _, value := range data {
