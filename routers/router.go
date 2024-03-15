@@ -2,6 +2,7 @@ package routers
 
 import (
 	"ally/config"
+	"ally/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,6 +11,7 @@ var r = gin.Default()
 
 // Run will start the server
 func Run() {
+	r.Use(middleware.Session("SESSION_SECRET"))
 	getRoutes()
 	r.Run(config.GlobalConfig.GetString("app.port"))
 }
