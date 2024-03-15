@@ -4,6 +4,7 @@ import (
 	"ally/utils/logging"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -23,7 +24,7 @@ func GetDbDatabase(database string) (*gorm.DB, error) {
 	var conf AppConfig
 	err := GlobalConfig.Unmarshal(&conf)
 	if err != nil {
-		logging.Error("配置文件解析失败", err)
+		slog.Error("配置文件解析失败", err)
 		return nil, err
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", conf.Mysql.User, conf.Mysql.Password, conf.Mysql.Host, conf.Mysql.Port, database)
@@ -46,7 +47,7 @@ func GetDbDatabase(database string) (*gorm.DB, error) {
 		Logger: newLogger,
 	})
 	if err != nil {
-		logging.Error("数据库连接失败", err)
+		slog.Error("数据库连接失败", err)
 		return nil, err
 	}
 	sqlDB, err := db.DB()

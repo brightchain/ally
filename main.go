@@ -1,15 +1,15 @@
 package main
 
 import (
+	"ally/config"
 	"ally/routers"
-	"ally/utils/logging"
 	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
-	logging.SetupLog()
+	config.SetupSlog()
 }
 
 func main() {

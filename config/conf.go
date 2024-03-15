@@ -1,9 +1,10 @@
 package config
 
 type AppConfig struct {
-	App   App   `json:"app"`
-	Mysql Mysql `json:"mysql"`
-	Redis Redis `json:"redis"`
+	App    App    `json:"app"`
+	Mysql  Mysql  `json:"mysql"`
+	Redis  Redis  `json:"redis"`
+	Logger Logger `json:"logger"`
 }
 
 type App struct {
@@ -23,4 +24,12 @@ type Redis struct {
 	Host string `json:"host"`
 	Db   string `json:"db"`
 	Port int    `json:"port"`
+}
+
+type Logger struct {
+	Level      string `json:"level"`
+	Filename   string `json:"filename"`
+	MaxAge     int    `json:"maxAge"`
+	MaxBackups int    `json:"maxBackups"`
+	MaxSize    int    `json:"maxSize"`
 }
