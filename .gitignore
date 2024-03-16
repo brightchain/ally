@@ -4,3 +4,8 @@ go.sum
 h5gin
 app.log
 gorm.log
+.idea/gweb.iml
+.idea/.gitignore
+.idea/modules.xml
+.idea/vcs.xml
+.vscode/launch.json

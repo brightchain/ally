@@ -105,7 +105,7 @@ func Fjpa(c *gin.Context) {
 
 	var result []Result
 
-	sqlQuery := "select a.name,a.mobile,a.work_num,a.contact ,a.organ ,b.num ,c.code ,if(c.active_time <>0,FROM_UNIXTIME(c.active_time),'') as active_time,if(c.remark,if(c.remark=1,'已分享','已领取'),'未分享') as 'remark',case c.status when '0' then '' when 1 then '已激活' when 2 then '已下单' end as status ,d.order_no,d.contact as cus_contact,d.mobile as cus_mobile,concat(d.province,d.city,d.area,d.address) as address,d.customer_info,d.ship_no,d.ship_name,if(d.c_time<>0,FROM_UNIXTIME(d.c_time),'') as c_time from car_order_photo_agent a left join ( select mobile,sum(num) as num from car_member_bind_logs where coupon_batch = 'P2403121036' and is_del = 0 GROUP BY mobile) b on a.mobile = b.mobile LEFT JOIN car_coupon c on c.batch_num = 'P2403121036' and c.mobile = a.mobile LEFT JOIN car_order_photo d on c.id = d.coupon_id and d.`status` != -1 where a.company = 22"
+	sqlQuery := "select a.name,a.mobile,a.work_num,a.contact ,a.organ ,b.num ,c.code ,if(c.active_time <>0,FROM_UNIXTIME(c.active_time),'') as active_time,if(c.remark is NULL,'未分享',if(c.remark=1,'已分享','已领取')) as 'remark',case c.status when '0' then '' when 1 then '已激活' when 2 then '已下单' end as status ,d.order_no,d.contact as cus_contact,d.mobile as cus_mobile,concat(d.province,d.city,d.area,d.address) as address,d.customer_info,d.ship_no,d.ship_name,if(d.c_time<>0,FROM_UNIXTIME(d.c_time),'') as c_time from car_order_photo_agent a left join ( select mobile,sum(num) as num from car_member_bind_logs where coupon_batch = 'P2403121036' and is_del = 0 GROUP BY mobile) b on a.mobile = b.mobile LEFT JOIN car_coupon c on c.batch_num = 'P2403121036' and c.mobile = a.mobile LEFT JOIN car_order_photo d on c.id = d.coupon_id and d.`status` != -1 where a.company = 22"
 	type Customer struct {
 		Contact  string `json:"contact"`
 		Work_num int    `json:"work_num"`
@@ -124,4 +124,54 @@ func Fjpa(c *gin.Context) {
 
 	utils.Down(result, "福建平安摆台", c)
 
+}
+
+func Ydln(c *gin.Context) {
+	db, err := config.GetDb()
+
+	if err != nil {
+		logging.Error("数据库连接失败", err)
+		c.String(http.StatusOK, err.Error())
+	}
+
+	type Result struct {
+		Code            string `json:"code" tag:"卡券编号"`
+		Name            string `json:"name" tag:"卡券名称"`
+		Sn              string `json:"sn" tag:"卡券编码"`
+		Password        string `json:"password" tag:"兑换码"`
+		Active_time     string `json:"active_time" tag:"激活时间"`
+		Remark          string `json:"remark" tag:"分享状态"`
+		Status          string `json:"status" tag:"卡券状态"`
+		Order_no        string `json:"order_no" tag:"订单号"`
+		Contact1        string `json:"contact1" tag:"收货人"`
+		Mobile1         string `json:"mobile1" tag:"收货手机"`
+		Customer_info   string `json:"customer_info" tag:"客户姓名"`
+		Customer_mobile string `json:"customer_mobile" tag:"客户手机"`
+		Address         string `json:"address" tag:"地址"`
+		Ship_name       string `json:"ship_name" tag:"快递公司"`
+		Ship_no         string `json:"ship_no" tag:"快递单号"`
+		C_time          string `json:"c_time" tag:"创建时间"`
+	}
+
+	var result []Result
+
+	sqlQuery := "select a.code,a.name,a.sn,a.`password`,if(a.active_time,FROM_UNIXTIME(a.active_time),'') as active_time,a.mobile,if(b.remark is NULL,'未分享',if(b.remark=1,'已分享','已领取')) as remark,case b.status when '0' then '' when 1 then '已激活' when 2 then '已下单' end as status ,c.order_no,c.contact as contact1,c.mobile as mobile1,concat(c.province,c.city,c.area,c.address) as address,c.customer_info,c.ship_no,c.ship_name,if(c.c_time<>0,FROM_UNIXTIME(c.c_time),'') as c_time from car_coupon_pkg a LEFT JOIN car_coupon b on (a.id = b.pkg_id) LEFT JOIN car_order_photo c on c.coupon_id = b.id and c.`status` <> -1 WHERE a.batch_num in ('PP2403041702','PP2403061702')"
+	type Customer struct {
+		Contact string `json:"contact"`
+		Mobile  string `json:"mobile"`
+	}
+
+	db.Raw(sqlQuery).Find(&result)
+	for k, v := range result {
+		if v.Customer_info != "" {
+			var tom Customer
+			err := json.Unmarshal([]byte(v.Customer_info), &tom)
+			if err == nil {
+				result[k].Customer_info = tom.Contact
+				result[k].Customer_mobile = tom.Mobile
+			}
+		}
+	}
+
+	utils.Down(result, "英大辽宁摆台", c)
 }
