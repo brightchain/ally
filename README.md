@@ -12,6 +12,9 @@
 - 下载依赖：go mod tidy
 - 运行项目：go run main.go
 
+## 服务重启
+- 进入当前目录：cd ally
+- 运行命令: ./server.sh
 
 ## Configuration
 ### 配置文件
