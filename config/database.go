@@ -1,7 +1,6 @@
 package config
 
 import (
-	"ally/utils/logging"
 	"fmt"
 	"log"
 	"log/slog"
@@ -52,7 +51,7 @@ func GetDbDatabase(database string) (*gorm.DB, error) {
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		logging.Error("数据库连接失败", err)
+		slog.Error("数据库连接失败", err)
 		return nil, err
 	}
 	//设置连接池

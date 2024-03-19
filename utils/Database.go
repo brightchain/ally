@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"ally/utils/logging"
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -13,7 +13,7 @@ func GetDb(host string, port int, username string, password string, database str
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true&loc=Local&timeout=8s", username, password, host, port, database)
 	Db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		logging.Error("mysql lost", err)
+		slog.Error("mysql lost", err)
 		return nil, err
 	}
 	// 设置连接池中空闲连接的最大数量。
@@ -27,7 +27,7 @@ func GetDb(host string, port int, username string, password string, database str
 
 	err = Db.Ping()
 	if err != nil {
-		logging.Error("mysql lost", err)
+		slog.Error("mysql lost", err)
 		return nil, err
 	}
 
@@ -38,7 +38,7 @@ func GetDb(host string, port int, username string, password string, database str
 func QueryOne(Db *sql.DB, query string) map[string]string {
 	rows, err := Db.Query(query)
 	if err != nil {
-		logging.Error("mysql lost: %v", err)
+		slog.Error("mysql lost: %v", err)
 		panic(err)
 	}
 	defer rows.Close()
@@ -71,7 +71,7 @@ func QueryOne(Db *sql.DB, query string) map[string]string {
 func QueryAll(Db *sql.DB, query string) []map[string]string {
 	rows, err := Db.Query(query)
 	if err != nil {
-		logging.Error("mysql lost: %v", err)
+		slog.Error("mysql lost: %v", err)
 		panic(err)
 	}
 	defer rows.Close()
@@ -100,7 +100,7 @@ func QueryAll(Db *sql.DB, query string) []map[string]string {
 func GetRows(Db *sql.DB, query string) *sql.Rows {
 	rows, err := Db.Query(query)
 	if err != nil {
-		logging.Error("mysql lost: %v", err)
+		slog.Error("mysql lost: %v", err)
 		panic(err)
 	}
 	defer rows.Close()

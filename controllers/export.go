@@ -3,8 +3,8 @@ package controllers
 import (
 	"ally/config"
 	"ally/utils"
-	"ally/utils/logging"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -14,7 +14,7 @@ import (
 func Xinhua(c *gin.Context) {
 	at := c.Query("at")
 	if at != "sfdjwie2ji239324" {
-		logging.Error("非法访问")
+		slog.Error("非法访问")
 		c.String(200, "非法访问")
 		return
 	}
@@ -22,6 +22,7 @@ func Xinhua(c *gin.Context) {
 	db, err := config.GetDb()
 
 	if err != nil {
+		slog.Error("数据库连接失败！", err)
 		c.String(http.StatusOK, err.Error())
 	}
 
@@ -78,7 +79,7 @@ func Fjpa(c *gin.Context) {
 	db, err := config.GetDb()
 
 	if err != nil {
-		logging.Error("数据库连接失败", err)
+		slog.Error("数据库连接失败", err)
 		c.String(http.StatusOK, err.Error())
 	}
 
@@ -130,7 +131,7 @@ func Ydln(c *gin.Context) {
 	db, err := config.GetDb()
 
 	if err != nil {
-		logging.Error("数据库连接失败", err)
+		slog.Error("数据库连接失败", err)
 		c.String(http.StatusOK, err.Error())
 	}
 

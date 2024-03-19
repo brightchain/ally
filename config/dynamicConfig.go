@@ -1,10 +1,10 @@
 package config
 
 import (
-	"log"
 	"os"
 
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slog"
 )
 
 var GlobalConfig *viper.Viper
@@ -27,7 +27,7 @@ func initViper() *viper.Viper {
 
 	err := GlobalConfig.ReadInConfig()
 	if err != nil {
-		log.Println(err)
+		slog.Error("配置文件读取失败！", err)
 	}
 
 	return GlobalConfig

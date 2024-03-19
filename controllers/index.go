@@ -5,6 +5,7 @@ import (
 	"ally/utils"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -18,6 +19,7 @@ func Index(c *gin.Context) {
 func Hngx(c *gin.Context) {
 	at := c.Query("at")
 	if at != "sfdjwie2ji239324" {
+		slog.Error("非法访问")
 		c.String(200, "非法访问")
 		return
 	}
