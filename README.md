@@ -12,6 +12,7 @@
 - 下载源码：git clone https://github.com/chenbinhua/ally.git
 - 下载依赖：go mod tidy
 - 运行项目：go run main.go
+- 编译项目：go build -o ally
 
 ## 服务重启
 - 进入当前目录：cd ally
