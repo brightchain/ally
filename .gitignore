@@ -1,8 +1,7 @@
 config_release.yaml
 config.yaml
 go.sum
-h5gin
-app.log
-gorm.log
+ally
 .idea/*
 .vscode/*
+log/*
