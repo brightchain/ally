@@ -13,7 +13,7 @@ redis:
   db: 1
 logger:
   level: debug            #日志记录级别
-  filename: ./app.log     #日志文件的位置
+  filename: ./log/app.log     #日志文件的位置
   maxSize: 5              #文件最大尺寸（以MB为单位）
   maxBackups: 0           #保留的最大旧文件数量
   maxAge: 0               #保留旧文件的最大天数
