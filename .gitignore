@@ -4,5 +4,5 @@ go.sum
 ally
 .idea/*
 .vscode/*
-log/app.log
-log/app.log
+log/*
+

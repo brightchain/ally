@@ -1,15 +1,15 @@
 package controllers
 
 import (
-	"ally/config"
+	"ally/model"
 	"ally/utils"
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/plugin/dbresolver"
 )
 
 func Index(c *gin.Context) {
@@ -22,12 +22,6 @@ func Hngx(c *gin.Context) {
 		slog.Error("非法访问")
 		c.String(200, "非法访问")
 		return
-	}
-
-	db, err := config.GetDb()
-
-	if err != nil {
-		c.String(http.StatusOK, err.Error())
 	}
 
 	type Result struct {
@@ -54,7 +48,7 @@ func Hngx(c *gin.Context) {
 
 	sqlQuery := "select a.active_time,a.status,b.sn,b.password,c.order_no,c.contact,c.mobile,c.province,c.city,c.area,c.address,c.customer_info,c.ship_name,c.ship_no,c.organ,c.work_num from car_coupon a left join  car_coupon_pkg b on a.pkg_id = b.id left join car_order_photo c on a.id = c.coupon_id where a.tp_code = 'CT000564' and a.status in(1,2) and a.active_time >1704038400"
 
-	db.Raw(sqlQuery).Find(&result)
+	model.DB.Raw(sqlQuery).Find(&result)
 
 	for k, v := range result {
 		type Customer struct {
@@ -91,12 +85,6 @@ func Hnkj(c *gin.Context) {
 		return
 	}
 
-	db, err := config.GetDb()
-
-	if err != nil {
-		c.String(http.StatusOK, err.Error())
-	}
-
 	type Result struct {
 		Sn            string `json:"sn" tag:"卡券编号"`
 		Password      string `json:"password" tag:"兑换码"`
@@ -121,7 +109,7 @@ func Hnkj(c *gin.Context) {
 
 	sqlQuery := "select a.active_time,a.status,b.sn,b.password,c.order_no,c.contact,c.mobile,c.province,c.city,c.area,c.address,c.customer_info,c.ship_name,c.ship_no,c.organ,c.work_num from car_coupon a left join  car_coupon_pkg b on a.pkg_id = b.id left join car_order_photo c on a.id = c.coupon_id where a.tp_code = 'CT001089' and a.status in(1,2) "
 
-	db.Raw(sqlQuery).Find(&result)
+	model.DB.Raw(sqlQuery).Find(&result)
 	type Customer struct {
 		Contact  string `json:"contact"`
 		Work_num int    `json:"work_num"`
@@ -157,11 +145,6 @@ func Smwj(c *gin.Context) {
 		return
 	}
 
-	db, err := config.GetDbDatabase("custom")
-
-	if err != nil {
-		c.JSON(http.StatusOK, err)
-	}
 	type Result struct {
 		Openid        string `json:"openid" tag:"openid"`
 		Name          string `json:"name" tag:"名称"`
@@ -177,7 +160,7 @@ func Smwj(c *gin.Context) {
 		Status        string `json:"status" tag:"状态"`
 		C_time        string `json:"c_time" tag:"创建时间"`
 	}
-	sqlQuery := "select openid,name,mobile,sex,question1,question2,question3,question_time,agent_name,agent_mobile,work_num,organ,branch,agent,c_time from (select a.id, a.openid,a.work_num,a.name,a.mobile,a.sex,a.question1,a.question2,a.question3,a.question_time,a.c_time,b.mobile as agent_mobile,b.name as agent_name,b.code,c.agent,c.branch,c.organ from cs_sino_wj a LEFT JOIN cs_sino_cus b on a.work_num = b.work_num LEFT JOIN car.car_order_photo_organ c on c.code = b.code and c.company = 21 ) as t where 1=1"
+	sqlQuery := "select openid,name,mobile,sex,question1,question2,question3,question_time,agent_name,agent_mobile,work_num,organ,branch,agent,c_time from (select a.id, a.openid,a.work_num,a.name,a.mobile,a.sex,a.question1,a.question2,a.question3,a.question_time,a.c_time,b.mobile as agent_mobile,b.name as agent_name,b.code,c.agent,c.branch,c.organ from cs_sino_wj a ,cs_sino_cus b ,  car.car_order_photo_organ c where a.work_num = b.work_num and c.code = b.code and c.company = 21 ) as t where 1=1"
 
 	organ, ok := c.GetQuery("organ")
 	if ok {
@@ -214,7 +197,7 @@ func Smwj(c *gin.Context) {
 	// return
 	var result []Result
 
-	db.Raw(sqlQuery).Find(&result)
+	model.DB.Clauses(dbresolver.Use("custom")).Raw(sqlQuery).Find(&result)
 
 	for k, v := range result {
 		t, _ := strconv.ParseInt(v.Question_time, 10, 64)

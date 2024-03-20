@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"ally/config"
+	"ally/model"
 	"ally/utils"
 	"encoding/json"
 	"log/slog"
@@ -12,19 +13,6 @@ import (
 )
 
 func Xinhua(c *gin.Context) {
-	at := c.Query("at")
-	if at != "sfdjwie2ji239324" {
-		slog.Error("非法访问")
-		c.String(200, "非法访问")
-		return
-	}
-
-	db, err := config.GetDb()
-
-	if err != nil {
-		slog.Error("数据库连接失败！", err)
-		c.String(http.StatusOK, err.Error())
-	}
 
 	type Result struct {
 		Code      string `json:"code" tag:"编码"`
@@ -50,7 +38,7 @@ func Xinhua(c *gin.Context) {
 
 	sqlQuery := "select a.code,a.status,a.remark,c.work_num,c.mobile,c.contact,c.organ,d.order_no,d.contact as contact1,d.mobile as mobile1,d.province,d.city,d.area,d.address,d.ship_name,d.ship_no,d.c_time from car_coupon a left join car_member b on a.user_id = b.id LEFT JOIN car_order_photo_agent c  on b.mobile = c.mobile and c.company = 19 LEFT JOIN car_order_photo d on a.id = d.coupon_id and d.status != -1 where a.batch_num = 'P2401291323' and a.status !=0"
 
-	db.Raw(sqlQuery).Find(&result)
+	model.DB.Raw(sqlQuery).Find(&result)
 	for k, v := range result {
 		status := "已激活"
 		remark := "未分享"
@@ -76,12 +64,6 @@ func Xinhua(c *gin.Context) {
 }
 
 func Fjpa(c *gin.Context) {
-	db, err := config.GetDb()
-
-	if err != nil {
-		slog.Error("数据库连接失败", err)
-		c.String(http.StatusOK, err.Error())
-	}
 
 	type Result struct {
 		Name          string `json:"nume" tag:"业务员姓名"`
@@ -112,7 +94,7 @@ func Fjpa(c *gin.Context) {
 		Work_num int    `json:"work_num"`
 	}
 
-	db.Raw(sqlQuery).Find(&result)
+	model.DB.Raw(sqlQuery).Find(&result)
 	for k, v := range result {
 		if v.Customer_info != "" {
 			var tom Customer
@@ -128,13 +110,6 @@ func Fjpa(c *gin.Context) {
 }
 
 func Ydln(c *gin.Context) {
-	db, err := config.GetDb()
-
-	if err != nil {
-		slog.Error("数据库连接失败", err)
-		c.String(http.StatusOK, err.Error())
-	}
-
 	type Result struct {
 		Code            string `json:"code" tag:"卡券编号"`
 		Name            string `json:"name" tag:"卡券名称"`
@@ -162,7 +137,7 @@ func Ydln(c *gin.Context) {
 		Mobile  string `json:"mobile"`
 	}
 
-	db.Raw(sqlQuery).Find(&result)
+	model.DB.Raw(sqlQuery).Find(&result)
 	for k, v := range result {
 		if v.Customer_info != "" {
 			var tom Customer
@@ -175,4 +150,18 @@ func Ydln(c *gin.Context) {
 	}
 
 	utils.Down(result, "英大辽宁摆台", c)
+}
+
+func ExcelDown(c *gin.Context) {
+	dataBase := c.Query("database")
+	db, err := config.GetDb()
+	if dataBase != "" {
+		db, err = config.GetDbDatabase(dataBase)
+	}
+	if err != nil {
+		slog.Error("数据库连接失败", err)
+		c.String(http.StatusOK, err.Error())
+	}
+	slog.Info("数据库信息", db)
+
 }

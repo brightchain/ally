@@ -55,10 +55,10 @@ func GetDbDatabase(database string) (*gorm.DB, error) {
 		return nil, err
 	}
 	//设置连接池
+	sqlDB.SetConnMaxLifetime(5 * time.Second)
 	//空闲
-	sqlDB.SetMaxIdleConns(1)
+	sqlDB.SetMaxIdleConns(2)
 	//打开
-	sqlDB.SetMaxOpenConns(5)
-
+	sqlDB.SetMaxOpenConns(3)
 	return db, err
 }

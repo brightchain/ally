@@ -2,7 +2,6 @@ package model
 
 import (
 	"ally/config"
-	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -11,18 +10,12 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"gorm.io/plugin/dbresolver"
 )
 
 var DB *gorm.DB
 
 func InitDb() {
-	var conf config.AppConfig
-	err := config.GlobalConfig.Unmarshal(&conf)
-	if err != nil {
-		slog.Error("配置文件解析失败", err)
-		return
-	}
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", conf.Mysql.User, conf.Mysql.Password, conf.Mysql.Host, conf.Mysql.Port, conf.Mysql.Db)
 	// 初始化GORM日志配置
 	f, err := os.OpenFile(`./log/gorm.log`, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -38,6 +31,7 @@ func InitDb() {
 		},
 	)
 
+	dsn := config.GlobalConfig.GetString("mysqlList.dsn.1")
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: newLogger,
 	})
@@ -50,11 +44,23 @@ func InitDb() {
 		slog.Error("数据库连接失败", err)
 		return
 	}
+	dsnList := config.GlobalConfig.Get("mysqlList.dsn")
+	if len(dsnList.([]interface{})) > 1 {
+		var m = make([]gorm.Dialector, len(dsnList.([]interface{})))
+		for i, v := range dsnList.([]interface{}) {
+			dsnStr := v.(string)
+			m[i] = mysql.Open(dsnStr)
+		}
+		db.Use(dbresolver.Register(dbresolver.Config{
+			Sources: m,
+		}))
+	}
+
 	//设置连接池
 	sqlDB.SetConnMaxLifetime(5 * time.Second)
 	//空闲
-	sqlDB.SetMaxIdleConns(2)
+	sqlDB.SetMaxIdleConns(3)
 	//打开
-	sqlDB.SetMaxOpenConns(3)
+	sqlDB.SetMaxOpenConns(5)
 	DB = db
 }
