@@ -1,20 +1,11 @@
 package config
 
 import (
-	"fmt"
 	"io"
 	"log/slog"
 	"os"
-	"path/filepath"
-	"runtime"
 
 	"gopkg.in/natefinch/lumberjack.v2"
-)
-
-var (
-	DefaultPrefix      = ""
-	DefaultCallerDepth = 0
-	logPrefix          = ""
 )
 
 func SetupSlog() {
@@ -47,15 +38,4 @@ func SetupSlog() {
 	slog.SetDefault(logger)
 	logger.Info("初始化日志完成")
 
-}
-
-func setPrefix() string {
-	_, file, line, ok := runtime.Caller(DefaultCallerDepth)
-	if ok {
-		logPrefix = fmt.Sprintf("[%s][%s:%d]", filepath.Base(file), line)
-	} else {
-		logPrefix = fmt.Sprintf("[%s]")
-	}
-
-	return logPrefix
 }
