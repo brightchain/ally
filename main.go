@@ -2,6 +2,7 @@ package main
 
 import (
 	"ally/config"
+	"ally/model"
 	"ally/routers"
 	"os"
 
@@ -10,6 +11,7 @@ import (
 
 func init() {
 	config.SetupSlog()
+	model.InitDb()
 }
 
 func main() {
