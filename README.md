@@ -6,6 +6,7 @@
 - 图像处理（压缩、剪切、合成）开发中...
 - 配置文件使用Viper管理，支持热加载
 - 日志输出使用Golang日志库slog，搭配lumberjack日志文件切割
+- 数据库使用gorm,支持多数据源DBResolver配置
 - 后台管理功能 开发中...
 
 ## Installation
