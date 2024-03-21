@@ -160,7 +160,7 @@ func Smwj(c *gin.Context) {
 		Status        string `json:"status" tag:"状态"`
 		C_time        string `json:"c_time" tag:"创建时间"`
 	}
-	sqlQuery := "select openid,name,mobile,sex,question1,question2,question3,question_time,agent_name,agent_mobile,work_num,organ,branch,agent,c_time from (select a.id, a.openid,a.work_num,a.name,a.mobile,a.sex,a.question1,a.question2,a.question3,a.question_time,a.c_time,b.mobile as agent_mobile,b.name as agent_name,b.code,c.agent,c.branch,c.organ from cs_sino_wj a ,cs_sino_cus b ,  car.car_order_photo_organ c where a.work_num = b.work_num and c.code = b.code and c.company = 21 ) as t where 1=1"
+	sqlQuery := "select openid,name,mobile,sex,question1,question2,question3,question_time,agent_name,agent_mobile,work_num,organ,branch,agent,c_time from (select a.id, a.openid,a.work_num,a.name,a.mobile,a.sex,a.question1,a.question2,a.question3,a.question_time,a.c_time,b.mobile as agent_mobile,b.name as agent_name,b.code,c.agent,c.branch,c.organ from cs_sino_wj a ,cs_sino_cus b ,  car.car_order_photo_organ c where a.work_num = b.work_num and c.code = b.code and c.company = 21   ) as t where 1=1"
 
 	organ, ok := c.GetQuery("organ")
 	if ok {
