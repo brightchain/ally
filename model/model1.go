@@ -2,20 +2,22 @@ package model
 
 import (
 	"ally/config"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/plugin/dbresolver"
 )
 
-var DB *gorm.DB
+var DbRes *gorm.DB
 
-func InitDb1() {
+func InitDbResolver() {
 	logConf := config.GlobalConfig.Sub("logger")
 	filename := logConf.GetString("gormFile")
 	level := logConf.GetString("filename")
@@ -33,7 +35,7 @@ func InitDb1() {
 	case "warn":
 		logOps.LogLevel = logger.Warn
 	case "error":
-		logOps.LogLevel = logger.Warn
+		logOps.LogLevel = logger.Error
 	default:
 		logOps.LogLevel = logger.Warn
 	}
@@ -43,8 +45,11 @@ func InitDb1() {
 		log.Fatalf("logger.Setup err: %v", err)
 	}
 	newLogger := logger.New(log.New(f, "\r\n", log.LstdFlags), logOps)
-
-	dsn := config.GlobalConfig.GetString("mysqlList.dsn.1")
+	dbconf1 := config.GlobalConfig.Get("database.db1")
+	var conf DBConfig
+	mapstructure.Decode(dbconf1, &conf)
+	dsn := getDsn(conf)
+	slog.Info(dsn)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: newLogger,
 	})
@@ -52,28 +57,43 @@ func InitDb1() {
 		slog.Error("数据库连接失败", err)
 		return
 	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		slog.Error("数据库连接失败", err)
-		return
-	}
-	dsnList := config.GlobalConfig.Get("mysqlList.dsn")
-	if len(dsnList.([]interface{})) > 1 {
-		var m = make([]gorm.Dialector, len(dsnList.([]interface{})))
-		for i, v := range dsnList.([]interface{}) {
-			dsnStr := v.(string)
-			m[i] = mysql.Open(dsnStr)
+
+	dbConf := config.GlobalConfig.Sub("database")
+	confMap := dbConf.AllSettings()
+	if len(confMap) > 1 {
+		var m = make([]gorm.Dialector, len(confMap)-1)
+		var conf1 DBConfig
+		i := 0
+		for _, v := range confMap {
+			mapstructure.Decode(v, &conf1)
+			if conf1.DsName == "db1" {
+				continue
+			}
+			dsn := getDsn(conf1)
+
+			m[i] = mysql.Open(dsn)
+			i++
 		}
+
 		db.Use(dbresolver.Register(dbresolver.Config{
 			Sources: m,
-		}))
+		}).SetMaxIdleConns(10).
+			SetConnMaxLifetime(time.Hour).
+			SetMaxOpenConns(200),
+		)
 	}
 
-	//设置连接池
-	sqlDB.SetConnMaxLifetime(5 * time.Second)
-	//空闲
-	sqlDB.SetMaxIdleConns(3)
-	//打开
-	sqlDB.SetMaxOpenConns(5)
-	DB = db
+	DbRes = db
+
+	slog.Info("数据库初始化完成")
+}
+
+func getDsn(conf DBConfig) string {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=true",
+		conf.Username,
+		conf.Password,
+		conf.Host,
+		conf.Port,
+		conf.Database)
+	return dsn
 }
