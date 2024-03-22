@@ -16,20 +16,33 @@ import (
 var DB *gorm.DB
 
 func InitDb() {
+	logConf := config.GlobalConfig.Sub("logger")
+	filename := logConf.GetString("gormFile")
+	level := logConf.GetString("filename")
+	logOps := logger.Config{
+		SlowThreshold:             time.Second, // Slow SQL threshold
+		LogLevel:                  logger.Info, // Log level(这里记得根据需求改一下)
+		IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
+		Colorful:                  false,       // Disable color
+	}
+	switch level {
+	case "debug":
+		logOps.LogLevel = logger.Info
+	case "info":
+		logOps.LogLevel = logger.Info
+	case "warn":
+		logOps.LogLevel = logger.Warn
+	case "error":
+		logOps.LogLevel = logger.Warn
+	default:
+		logOps.LogLevel = logger.Warn
+	}
 	// 初始化GORM日志配置
-	f, err := os.OpenFile(`./log/gorm.log`, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("logger.Setup err: %v", err)
 	}
-	newLogger := logger.New(
-		log.New(f, "\r\n", log.LstdFlags), // io writer
-		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level(这里记得根据需求改一下)
-			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			Colorful:                  false,       // Disable color
-		},
-	)
+	newLogger := logger.New(log.New(f, "\r\n", log.LstdFlags), logOps)
 
 	dsn := config.GlobalConfig.GetString("mysqlList.dsn.1")
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
