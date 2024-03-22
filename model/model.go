@@ -89,7 +89,7 @@ func connDB(conf DBConfig) (*gorm.DB, error) {
 	case "warn":
 		logOps.LogLevel = logger.Warn
 	case "error":
-		logOps.LogLevel = logger.Warn
+		logOps.LogLevel = logger.Error
 	default:
 		logOps.LogLevel = logger.Warn
 	}
@@ -99,21 +99,13 @@ func connDB(conf DBConfig) (*gorm.DB, error) {
 		log.Fatalf("logger.Setup err: %v", err)
 	}
 	newLogger := logger.New(log.New(f, "\r\n", log.LstdFlags), logOps)
-	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=true",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=true",
 		conf.Username,
 		conf.Password,
 		conf.Host,
 		conf.Port,
 		conf.Database)
-	dialector := mysql.New(mysql.Config{
-		DSN:                       dbURI, // data source name
-		DefaultStringSize:         256,   // default size for string fields
-		DisableDatetimePrecision:  true,  // disable datetime precision, which not supported before MySQL 5.6
-		DontSupportRenameIndex:    true,  // drop & create when rename index, rename index not supported before MySQL 5.7, MariaDB
-		DontSupportRenameColumn:   true,  // `change` when rename column, rename column not supported before MySQL 8, MariaDB
-		SkipInitializeWithVersion: false, // auto configure based on currently MySQL version
-	})
-	conn, err := gorm.Open(dialector, &gorm.Config{
+	conn, err := gorm.Open(mysql.New(mysql.Config{DSN: dsn}), &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {
