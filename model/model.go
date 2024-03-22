@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -25,12 +26,12 @@ type RDBManager struct {
 
 // 数据库配置
 type DBConfig struct {
-	DsName   string // 数据源名称
-	Host     string // 地址IP
-	Port     int    // 数据库端口
-	Database string // 数据库名称
-	Username string // 账号
-	Password string // 密码
+	DsName   string `json:"dsName"`   // 数据源名称
+	Host     string `json:"host"`     // 地址IP
+	Port     int    `json:"port"`     // 数据库端口
+	Database string `json:"database"` // 数据库名称
+	Username string `json:"username"` // 账号
+	Password string `json:"password"` // 密码
 }
 
 // db连接
@@ -41,59 +42,23 @@ var (
 
 func InitDb() {
 
-	db1Con := config.GlobalConfig.Sub("database")
-	confMap := db1Con.AllSettings()
+	dbConf := config.GlobalConfig.Sub("database")
+	confMap := dbConf.AllSettings()
 
 	for _, v := range confMap {
-		// 这里假设你有一个 DBConfig 结构体，需要根据实际结构体字段进行解码或转换
-		//var conf DBConfig
-		// 进行类型断言或转换，注意这里取决于v的实际内容和DBConfig结构体的定义
-		// 通常情况下，这可能需要通过json.Unmarshal或其他方式解析
-		fmt.Print("配置%T", v)
-		fmt.Print("配置%s", v["username"])
-
-		// 现在你可以安全地使用conf变量了
-		//connByConf(conf)
+		var conf DBConfig
+		//map[string]interface{}转结构体
+		mapstructure.Decode(v, &conf)
+		slog.Info("数据库信息", conf.Database)
+		connByConf(conf)
 	}
 
-	// var db1Conf DBConfig
-	// db1Con.Unmarshal(&db1Conf)
-	// db1, err := connDB(db1Conf)
-	// if err != nil {
-	// 	slog.Error("数据库链接失败 %s ", err.Error())
-	// 	return
-	// }
-	// if len(db1Conf.DsName) == 0 {
-	// 	db1Conf.DsName = MASTER
-	// }
-	// rdb1 := &RDBManager{
-	// 	Db:     db1,
-	// 	DsName: db1Conf.DsName,
-	// }
-	// RDBs[db1Conf.DsName] = rdb1
-	// db2Con := config.GlobalConfig.Sub("database.db2")
-	// var db2Conf DBConfig
-	// db2Con.Unmarshal(&db2Conf)
-	// db2, err := connDB(db2Conf)
-	// if err != nil {
-	// 	slog.Error("数据库链接失败 %s ", err.Error())
-	// 	return
-	// }
-	// if len(db2Conf.DsName) == 0 {
-	// 	db2Conf.DsName = MASTER
-	// }
-	// slog.Info("数据库连接器", db2Conf.DsName)
-	// rdb2 := &RDBManager{
-	// 	Db:     db2,
-	// 	DsName: db2Conf.DsName,
-	// }
-	// RDBs[db2Conf.DsName] = rdb2
 }
 
 func connByConf(input DBConfig) {
 	db, err := connDB(input)
 	if err != nil {
-		slog.Error("数据库链接失败 %s ", err.Error())
+		slog.Error("数据库链接失败!", err)
 		return
 	}
 	if len(input.DsName) == 0 {
@@ -134,7 +99,7 @@ func connDB(conf DBConfig) (*gorm.DB, error) {
 		log.Fatalf("logger.Setup err: %v", err)
 	}
 	newLogger := logger.New(log.New(f, "\r\n", log.LstdFlags), logOps)
-	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true",
+	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=true",
 		conf.Username,
 		conf.Password,
 		conf.Host,

@@ -20,14 +20,14 @@ logger:
   maxAge: 0               #保留旧文件的最大天数
 database:
   db1:
-    dsName: db1
+    dsname: db1
     username: user
     password: password
     host: 127.0.0.1
     port: 3306
     database: db
   db2:
-    dsName: db2
+    dsname: db2
     username: user
     password: password
     host: 127.0.0.1
