@@ -38,7 +38,8 @@ func Xinhua(c *gin.Context) {
 
 	sqlQuery := "select a.code,a.status,a.remark,c.work_num,c.mobile,c.contact,c.organ,d.order_no,d.contact as contact1,d.mobile as mobile1,d.province,d.city,d.area,d.address,d.ship_name,d.ship_no,d.c_time from car_coupon a left join car_member b on a.user_id = b.id LEFT JOIN car_order_photo_agent c  on b.mobile = c.mobile and c.company = 19 LEFT JOIN car_order_photo d on a.id = d.coupon_id and d.status != -1 where a.batch_num = 'P2401291323' and a.status !=0"
 
-	model.DB.Raw(sqlQuery).Find(&result)
+	db := model.RDBs[model.MASTER]
+	db.Db.Raw(sqlQuery).Find(&result)
 	for k, v := range result {
 		status := "已激活"
 		remark := "未分享"
@@ -94,7 +95,8 @@ func Fjpa(c *gin.Context) {
 		Work_num int    `json:"work_num"`
 	}
 
-	model.DB.Raw(sqlQuery).Find(&result)
+	db := model.RDBs[model.MASTER]
+	db.Db.Raw(sqlQuery).Find(&result)
 	for k, v := range result {
 		if v.Customer_info != "" {
 			var tom Customer
@@ -137,7 +139,8 @@ func Ydln(c *gin.Context) {
 		Mobile  string `json:"mobile"`
 	}
 
-	model.DB.Raw(sqlQuery).Find(&result)
+	db := model.RDBs[model.MASTER]
+	db.Db.Raw(sqlQuery).Find(&result)
 	for k, v := range result {
 		if v.Customer_info != "" {
 			var tom Customer

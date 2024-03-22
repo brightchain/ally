@@ -18,7 +18,18 @@ logger:
   maxSize: 5              #文件最大尺寸（以MB为单位）
   maxBackups: 0           #保留的最大旧文件数量
   maxAge: 0               #保留旧文件的最大天数
-mysqlList:
-  dsn:
-    - user:password@tcp(127.0.0.1:3306)/db?charset=utf8mb4&parseTime=True&loc=Local
-    - user:password1@tcp(127.0.0.1:3306)/db1?charset=utf8mb4&parseTime=True&loc=Local
+database:
+  db1:
+    dsName: db1
+    username: user
+    password: password
+    host: 127.0.0.1
+    port: 3306
+    database: db
+  db2:
+    dsName: db2
+    username: user
+    password: password
+    host: 127.0.0.1
+    port: 3306
+    database: db

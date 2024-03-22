@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/plugin/dbresolver"
 )
 
 func Index(c *gin.Context) {
@@ -47,8 +46,8 @@ func Hngx(c *gin.Context) {
 	var result []Result
 
 	sqlQuery := "select a.active_time,a.status,b.sn,b.password,c.order_no,c.contact,c.mobile,c.province,c.city,c.area,c.address,c.customer_info,c.ship_name,c.ship_no,c.organ,c.work_num from car_coupon a left join  car_coupon_pkg b on a.pkg_id = b.id left join car_order_photo c on a.id = c.coupon_id where a.tp_code = 'CT000564' and a.status in(1,2) and a.active_time >1704038400"
-
-	model.DB.Raw(sqlQuery).Find(&result)
+	db := model.RDBs[model.MASTER]
+	db.Db.Raw(sqlQuery).Find(&result)
 
 	for k, v := range result {
 		type Customer struct {
@@ -108,8 +107,8 @@ func Hnkj(c *gin.Context) {
 	var result []Result
 
 	sqlQuery := "select a.active_time,a.status,b.sn,b.password,c.order_no,c.contact,c.mobile,c.province,c.city,c.area,c.address,c.customer_info,c.ship_name,c.ship_no,c.organ,c.work_num from car_coupon a left join  car_coupon_pkg b on a.pkg_id = b.id left join car_order_photo c on a.id = c.coupon_id where a.tp_code = 'CT001089' and a.status in(1,2) "
-
-	model.DB.Raw(sqlQuery).Find(&result)
+	db := model.RDBs[model.MASTER]
+	db.Db.Raw(sqlQuery).Find(&result)
 	type Customer struct {
 		Contact  string `json:"contact"`
 		Work_num int    `json:"work_num"`
@@ -196,8 +195,8 @@ func Smwj(c *gin.Context) {
 	// c.String(200, sqlQuery)
 	// return
 	var result []Result
-
-	model.DB.Clauses(dbresolver.Use("custom")).Raw(sqlQuery).Find(&result)
+	db := model.RDBs["db2"]
+	db.Db.Raw(sqlQuery).Find(&result)
 
 	for k, v := range result {
 		t, _ := strconv.ParseInt(v.Question_time, 10, 64)

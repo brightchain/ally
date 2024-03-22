@@ -2,6 +2,8 @@ package model
 
 import (
 	"ally/config"
+	"errors"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -10,12 +12,70 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"gorm.io/plugin/dbresolver"
 )
 
-var DB *gorm.DB
+// 连接管理器
+type RDBManager struct {
+	OpenTx bool     // 是否开启事务
+	DsName string   // 数据源名称
+	Db     *gorm.DB // 非事务实例
+	Tx     *gorm.Tx // 事务实例
+	Errors []error  // 操作过程中记录的错误
+}
+
+// 数据库配置
+type DBConfig struct {
+	DsName   string // 数据源名称
+	Host     string // 地址IP
+	Port     string // 数据库端口
+	Database string // 数据库名称
+	Username string // 账号
+	Password string // 密码
+}
+
+// db连接
+var (
+	MASTER = "db1"                    // 默认主数据源
+	RDBs   = map[string]*RDBManager{} // 初始化时加载数据源到集合
+)
 
 func InitDb() {
+	db1Con := config.GlobalConfig.Sub("database.db1")
+	var db1Conf DBConfig
+	db1Con.Unmarshal(&db1Conf)
+	db1, err := connDB(db1Conf)
+	if err != nil {
+		slog.Error("数据库链接失败 %s ", err.Error())
+		return
+	}
+	if len(db1Conf.DsName) == 0 {
+		db1Conf.DsName = MASTER
+	}
+	rdb1 := &RDBManager{
+		Db:     db1,
+		DsName: db1Conf.DsName,
+	}
+	RDBs[db1Conf.DsName] = rdb1
+	db2Con := config.GlobalConfig.Sub("database.db2")
+	var db2Conf DBConfig
+	db2Con.Unmarshal(&db2Conf)
+	db2, err := connDB(db2Conf)
+	if err != nil {
+		slog.Error("数据库链接失败 %s ", err.Error())
+		return
+	}
+	if len(db2Conf.DsName) == 0 {
+		db2Conf.DsName = MASTER
+	}
+	slog.Info("数据库连接器", db2Conf.DsName)
+	rdb2 := &RDBManager{
+		Db:     db2,
+		DsName: db2Conf.DsName,
+	}
+	RDBs[db2Conf.DsName] = rdb2
+}
+
+func connDB(conf DBConfig) (*gorm.DB, error) {
 	logConf := config.GlobalConfig.Sub("logger")
 	filename := logConf.GetString("gormFile")
 	level := logConf.GetString("filename")
@@ -43,37 +103,38 @@ func InitDb() {
 		log.Fatalf("logger.Setup err: %v", err)
 	}
 	newLogger := logger.New(log.New(f, "\r\n", log.LstdFlags), logOps)
-
-	dsn := config.GlobalConfig.GetString("mysqlList.dsn.1")
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=true",
+		conf.Username,
+		conf.Password,
+		conf.Host,
+		conf.Port,
+		conf.Database)
+	dialector := mysql.New(mysql.Config{
+		DSN:                       dbURI, // data source name
+		DefaultStringSize:         256,   // default size for string fields
+		DisableDatetimePrecision:  true,  // disable datetime precision, which not supported before MySQL 5.6
+		DontSupportRenameIndex:    true,  // drop & create when rename index, rename index not supported before MySQL 5.7, MariaDB
+		DontSupportRenameColumn:   true,  // `change` when rename column, rename column not supported before MySQL 8, MariaDB
+		SkipInitializeWithVersion: false, // auto configure based on currently MySQL version
+	})
+	conn, err := gorm.Open(dialector, &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {
 		slog.Error("数据库连接失败", err)
-		return
+		return nil, errors.New("数据库连接失败")
 	}
-	sqlDB, err := db.DB()
+	sqlDB, err := conn.DB()
 	if err != nil {
 		slog.Error("数据库连接失败", err)
-		return
+		return nil, errors.New("数据库连接失败")
 	}
-	dsnList := config.GlobalConfig.Get("mysqlList.dsn")
-	if len(dsnList.([]interface{})) > 1 {
-		var m = make([]gorm.Dialector, len(dsnList.([]interface{})))
-		for i, v := range dsnList.([]interface{}) {
-			dsnStr := v.(string)
-			m[i] = mysql.Open(dsnStr)
-		}
-		db.Use(dbresolver.Register(dbresolver.Config{
-			Sources: m,
-		}))
-	}
-
 	//设置连接池
 	sqlDB.SetConnMaxLifetime(5 * time.Second)
 	//空闲
 	sqlDB.SetMaxIdleConns(3)
 	//打开
 	sqlDB.SetMaxOpenConns(5)
-	DB = db
+
+	return conn, nil
 }
