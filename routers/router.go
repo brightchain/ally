@@ -21,4 +21,5 @@ func Run() {
 // so this one won't be so messy
 func getRoutes() {
 	addWebRoute(r)
+	addApiRoute(r)
 }
