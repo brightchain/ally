@@ -26,7 +26,9 @@ func addWebRoute(r *gin.Engine) {
 		export.GET("/excel-down", controllers.ExcelDown)
 	}
 
-	r.POST("/aes/aes", controllers.Aes)
-	r.POST("/aes/encrypt", controllers.Encrypt)
+	aes := controllers.AesEcb{}
+	r.POST("/aes/aes", aes.Aes)
+	r.POST("/aes/encrypt", aes.Encrypt)
+	r.POST("/aes/dow", aes.Down)
 
 }
