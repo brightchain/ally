@@ -11,6 +11,6 @@ func addApiRoute(r *gin.Engine) {
 	apiGroup := r.Group("/api")
 	apiGroup.Use(middleware.AesDecrypt())
 	{
-		apiGroup.POST("/downZip", api.Index)
+		apiGroup.POST("/downzip", api.PhotoOrder)
 	}
 }
