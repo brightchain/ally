@@ -1,11 +1,36 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+	"ally/model"
+	"encoding/json"
+	"fmt"
+	"log/slog"
+	"strings"
 
-func Index(c *gin.Context) {
-	str := c.Query("decrypt")
-	c.JSON(200, gin.H{
-		"status": "success",
-		"data":   str,
-	})
+	"github.com/gin-gonic/gin"
+)
+
+func PhotoOrder(c *gin.Context) {
+	decrypt, _ := c.Get("decrypt")
+	var param map[string]string
+	str, _ := decrypt.([]byte)
+	_ = json.Unmarshal(str, &param)
+	slog.Info("优化", param)
+
+	var values []interface{}
+	where := " 1=1"
+
+	for k, v := range param {
+		tmp := strings.Split(v, " ")
+		where += fmt.Sprintf(" and %s %s ?", k, tmp[0])
+		vl := strings.Split(tmp[1], ",")
+		values = append(values, vl)
+	}
+	slog.Info("where:", where)
+	slog.Info("values:", values)
+	db := model.RDBs[model.MASTER]
+	var orders []model.PhotoCy
+	db.Db.Model(&model.CarOrderPhoto{}).Where(where, values...).Find(&orders)
+
+	c.JSON(200, orders)
 }

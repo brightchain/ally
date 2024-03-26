@@ -66,7 +66,7 @@ func (a *AesEcb) Down(c *gin.Context) {
 	for k, v := range par {
 		tm := strings.Split(v, " ")
 		where += fmt.Sprintf(" and %s %s ?", k, tm[0])
-		values = append(values, string(tm[1]))
+		values = append(values, tm[1])
 	}
 
 	type Result struct {
