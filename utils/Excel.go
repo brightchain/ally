@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log/slog"
 	"net/url"
 	"reflect"
 	"time"
@@ -56,4 +57,36 @@ func Down[T any](data []T, filename string, c *gin.Context) {
 	c.Writer.Header().Set("Content-Transfer-Encoding", "binary")
 	c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
 	_ = f.Write(c.Writer)
+}
+
+func SaveFile[T any](data []T, filename string) {
+	sheetName := "Sheet1"
+	f := excelize.NewFile()
+	f.SetSheetName(sheetName, sheetName)
+	v0 := reflect.ValueOf(data[0])
+	if v0.Kind() == reflect.Ptr {
+		v0 = v0.Elem()
+	}
+	if v0.Kind() != reflect.Struct {
+		return
+	}
+	header := getHeaders(&v0)
+	_ = f.SetSheetRow(sheetName, "A1", &header)
+
+	rowNum := 1 //数据开始行数
+	for _, value := range data {
+		row := make([]interface{}, 0)
+		vI := reflect.ValueOf(value)
+		if vI.Kind() == reflect.Ptr {
+			vI = vI.Elem()
+		}
+		for i := 0; i < vI.NumField(); i++ {
+			row = append(row, fmt.Sprintf("%v", vI.Field(i)))
+		}
+		rowNum++
+		f.SetSheetRow("Sheet1", fmt.Sprintf("A%d", rowNum), &row)
+	}
+	if err := f.SaveAs(filename); err != nil {
+		slog.Error("excel error", err)
+	}
 }
