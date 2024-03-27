@@ -2,6 +2,7 @@ package api
 
 import (
 	"ally/model"
+	"ally/utils"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -33,4 +34,26 @@ func PhotoOrder(c *gin.Context) {
 	db.Db.Model(&model.CarOrderPhoto{}).Where(where, values...).Find(&orders)
 
 	c.JSON(200, orders)
+}
+
+func Zip(c *gin.Context) {
+	// var abPath string
+	// _, filename, _, ok := runtime.Caller(0)
+	// if ok {
+	// 	abPath = path.Dir(filename)
+	// }
+	fileName := "1.zip"
+
+	zipWriter, err := utils.ZipFiles(fileName)
+	if err != nil {
+		slog.Warn("创建压缩文件失败", err)
+	}
+	defer zipWriter.Close()
+	err = utils.AddFileToZip(zipWriter, "1.xlsx")
+	if err != nil {
+		slog.Warn("压缩失败")
+	}
+
+	c.String(200, "/public/storage/1.zip")
+
 }
