@@ -11,6 +11,7 @@ var r = gin.Default()
 
 // Run will start the server
 func Run() {
+	r.Static("/public/storage", "./storage/app/public")
 	r.Use(middleware.Session("SESSION_SECRET"))
 	getRoutes()
 	r.Run(config.GlobalConfig.GetString("app.port"))
