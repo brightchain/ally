@@ -3,9 +3,12 @@ package api
 import (
 	"ally/model"
 	"ally/utils"
+	"archive/zip"
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -37,23 +40,34 @@ func PhotoOrder(c *gin.Context) {
 }
 
 func Zip(c *gin.Context) {
-	// var abPath string
-	// _, filename, _, ok := runtime.Caller(0)
-	// if ok {
-	// 	abPath = path.Dir(filename)
-	// }
-	fileName := "1.zip"
 
-	zipWriter, err := utils.ZipFiles(fileName)
+	ex, err := os.Executable()
 	if err != nil {
-		slog.Warn("创建压缩文件失败", err)
+		panic(err)
 	}
-	defer zipWriter.Close()
-	err = utils.AddFileToZip(zipWriter, "1.xlsx")
+	exPath := filepath.Dir(ex)
+	fmt.Println(exPath)
+	path := exPath + "/storage/app/public"
+	fileName := path + "/1.zip"
+	newZipFile, err := os.Create(fileName)
+	if err != nil {
+		slog.Error("zip create fail", err)
+		return
+	}
+
+	defer newZipFile.Close()
+	zipWriter := zip.NewWriter(newZipFile)
+
+	err = utils.AddFileToZip(zipWriter, path+"/1.xlsx", "img/")
+	if err != nil {
+		slog.Warn("压缩失败")
+	}
+	err = utils.AddFileToZip(zipWriter, path+"/1.png", "excel/")
 	if err != nil {
 		slog.Warn("压缩失败")
 	}
 
+	defer zipWriter.Close()
 	c.String(200, "/public/storage/1.zip")
 
 }
