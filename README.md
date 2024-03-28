@@ -2,7 +2,7 @@
 
 ## 主要功能
 - excel数据导出
-- 文件压缩
+- 文件zip压缩和下载
 - 图像处理（压缩、剪切、合成）开发中...
 - 配置文件使用Viper管理，支持热加载
 - 日志输出使用Golang日志库slog，搭配lumberjack日志文件切割
@@ -10,7 +10,7 @@
 - 后台管理功能 开发中...
 
 ## Installation
-- 下载源码：git clone https://github.com/chenbinhua/ally.git
+- 下载源码：git clone https://github.com/brightchain/ally.git
 - 下载依赖：go mod tidy
 - 运行项目：go run main.go
 - 编译项目：go build -o ally
