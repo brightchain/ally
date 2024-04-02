@@ -24,8 +24,8 @@ crypto: #加密配置
   aes-128-key: 1234567890123456 
 logger:
   level: debug  #日志记录级别 debug,info,warn,error  
-  filename: ./log/app.log     #日志文件的位置
-  gormFile: ./log/gorm.log     #日志文件的位置
+  filename: ./storage/logs/app.log     #日志文件的位置
+  gormFile: ./storage/logs/gorm.log     #日志文件的位置
   maxSize: 5              #文件最大尺寸（以MB为单位）
   maxBackups: 0           #保留的最大旧文件数量
   maxAge: 0               #保留旧文件的最大天数
