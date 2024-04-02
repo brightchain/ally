@@ -6,5 +6,4 @@ ally
 .vscode/*
 log/*
 storage/app/public/*
-
-
+storage/logs/*
