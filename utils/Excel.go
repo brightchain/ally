@@ -18,6 +18,10 @@ func getHeaders(v *reflect.Value) []string {
 		field := v.Type().Field(i)
 		//取tag
 		column := field.Tag.Get("tag")
+		isExp := field.Tag.Get("exp")
+		if isExp == "1" {
+			continue
+		}
 		columns = append(columns, column)
 	}
 	return columns
@@ -45,6 +49,10 @@ func Down[T any](data []T, filename string, c *gin.Context) {
 			vI = vI.Elem()
 		}
 		for i := 0; i < vI.NumField(); i++ {
+			isExp := vI.Type().Field(i).Tag.Get("exp")
+			if isExp == "1" {
+				continue
+			}
 			row = append(row, fmt.Sprintf("%v", vI.Field(i)))
 		}
 		rowNum++
@@ -81,6 +89,10 @@ func SaveFile[T any](data []T, filename string) {
 			vI = vI.Elem()
 		}
 		for i := 0; i < vI.NumField(); i++ {
+			isExp := vI.Type().Field(i).Tag.Get("exp")
+			if isExp == "1" {
+				continue
+			}
 			row = append(row, fmt.Sprintf("%v", vI.Field(i)))
 		}
 		rowNum++
