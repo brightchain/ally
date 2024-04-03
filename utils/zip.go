@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func AddFileToZip(z *zip.Writer, filename string, path string) error {
+func AddFileToZip(z *zip.Writer, filename string, name string) error {
 	//打开要压缩的文件
 	fileToZip, err := os.Open(filename)
 	if err != nil {
@@ -24,9 +24,11 @@ func AddFileToZip(z *zip.Writer, filename string, path string) error {
 	if err != nil {
 		return err
 	}
+	if name == "" {
+		_, name = filepath.Split(filename)
+	}
 
-	_, name := filepath.Split(filename)
-	header.Name = path + name
+	header.Name = name
 	/*
 	   预定义压缩算法。
 	   archive/zip包中预定义的有两种压缩方式。一个是仅把文件写入到zip中。不做压缩。一种是压缩文件然后写入到zip中。默认的Store模式。就是只保存不压缩的模式。
