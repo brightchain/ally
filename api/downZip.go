@@ -7,9 +7,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,13 +32,41 @@ func PhotoOrder(c *gin.Context) {
 		vl := strings.Split(tmp[1], ",")
 		values = append(values, vl)
 	}
-	slog.Info("where:", where)
-	slog.Info("values:", values)
 	db := model.RDBs[model.MASTER]
 	var orders []model.PhotoCy
 	db.Db.Model(&model.CarOrderPhoto{}).Where(where, values...).Find(&orders)
-
-	c.JSON(200, orders)
+	if len(orders) == 0 {
+		c.String(200, "数据不存在！")
+	}
+	path := "./storage/app/public"
+	currentTime := time.Now()
+	r := rand.New(rand.NewSource(currentTime.UnixNano()))
+	name := fmt.Sprintf("%s%d", currentTime.Format("20060102150405"), r.Int63n(1000))
+	fileName := path + "/" + name + ".xlsx"
+	utils.SaveFile(orders, fileName)
+	zipName := path + "/" + name + ".zip"
+	newZipFile, err := os.Create(zipName)
+	if err != nil {
+		slog.Error("zip create fail", err)
+		return
+	}
+	defer newZipFile.Close()
+	zipWriter := zip.NewWriter(newZipFile)
+	defer zipWriter.Close()
+	err = utils.AddFileToZip(zipWriter, fileName, "")
+	if err != nil {
+		slog.Warn("压缩失败")
+	}
+	for _, order := range orders {
+		name := strings.ToLower(order.OrderNo)
+		fileName := model.FilePath + "/" + name + "/" + order.ProId + ".jpeg"
+		zName := order.Uid + " " + order.Contact + " " + name + " " + order.ProName + ".jpeg"
+		err = utils.AddFileToZip(zipWriter, fileName, zName)
+		if err != nil {
+			slog.Warn("压缩失败", err)
+		}
+	}
+	c.String(200, "ok")
 }
 
 func Zip(c *gin.Context) {

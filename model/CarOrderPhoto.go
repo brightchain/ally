@@ -1,5 +1,11 @@
 package model
 
+import (
+	"ally/utils"
+
+	"gorm.io/gorm"
+)
+
 type CarOrderPhoto struct {
 	Id           int32  `gorm:"column:id;primary_key;AUTO_INCREMENT;NOT NULL"`
 	OrderNo      string `gorm:"column:order_no;NOT NULL;comment:'订单编号'"`
@@ -38,28 +44,37 @@ type CarOrderPhoto struct {
 	ShipTime     int32  `gorm:"column:ship_time;default:0;NOT NULL;comment:'发货时间'"`
 	SendTime     int32  `gorm:"column:send_time;default:0;NOT NULL;comment:'推送时间'"`
 	Status       int8   `gorm:"column:status;default:0;NOT NULL;comment:'订单状态：-1-已取消，0-已下单，1-已同步，2-已发货，3-已完成'"`
-	CTime        int32  `gorm:"column:c_time;default:0;NOT NULL;comment:'创建时间'"`
-	UTime        int32  `gorm:"column:u_time;default:0;NOT NULL;comment:'更新时间'"`
+	CTime        string `gorm:"column:c_time;default:0;NOT NULL;comment:'创建时间'"`
+	UTime        string `gorm:"column:u_time;default:0;NOT NULL;comment:'更新时间'"`
 }
 
 type PhotoCy struct {
-	OrderNo      string `json:"order_no" tag:"订单编号"`      // 订单编号
-	BatchNum     string `json:"batch_num" tag:"优惠券批次号"`   // 优惠券批次号
-	ProName      string `json:"pro_name" tag:"产品名称"`      // 产品名称
-	Contact      string `json:"contact" tag:"收货人"`        // 收货人
-	Mobile       string `json:"mobile" tag:"收货手机"`        // 收货手机
-	Province     string `json:"province" tag:"省"`         // 省
-	City         string `json:"city" tag:"市"`             // 市
-	Area         string `json:"area" tag:"区"`             // 区
-	Address      string `json:"address" tag:"详细地址"`       // 详细地址
-	CustomerInfo string `json:"customer_info" tag:"客户信息"` // 客户信息
-	WorkNum      string `json:"work_num" tag:"客户工号"`      // 客户工号
-	Company      int8   `json:"company" tag:"照片摆台供应商"`    // 照片摆台供应商：1-美印，2-影印
-	ShipNo       string `json:"ship_no" tag:"快递单号"`       // 快递单号
-	ShipName     string `json:"ship_name" tag:"快递公司"`     // 快递公司
-	CTime        int32  `json:"c_time" tag:"创建时间"`        // 创建时间
+	OrderNo      string `json:"order_no" tag:"订单编号"`                            // 订单编号
+	Uid          string `json:"uid" tag:"用户id" exp:"1"`                         // 订单编号
+	BatchNum     string `json:"batch_num" tag:"优惠券批次号" exp:"1"`                 // 优惠券批次号
+	ProName      string `json:"pro_name" tag:"产品名称"`                            // 产品名称
+	ProId        string `json:"pro_id" gorm:"column:pro_id" tag:"产品id" exp:"1"` // 产品名称
+	Contact      string `json:"contact" tag:"收货人"`                              // 收货人
+	Mobile       string `json:"mobile" tag:"收货手机"`                              // 收货手机
+	Province     string `json:"province" tag:"省"`                               // 省
+	City         string `json:"city" tag:"市"`                                   // 市
+	Area         string `json:"area" tag:"区"`                                   // 区
+	Address      string `json:"address" tag:"详细地址"`                             // 详细地址
+	CustomerInfo string `json:"customer_info" tag:"客户信息" exp:"1"`               // 客户信息
+	WorkNum      string `json:"work_num" tag:"客户工号"`                            // 客户工号
+	Company      int8   `json:"company" tag:"照片摆台供应商" exp:"1"`                  // 照片摆台供应商：1-美印，2-影印
+	ShipNo       string `json:"ship_no" tag:"快递单号"`                             // 快递单号
+	ShipName     string `json:"ship_name" tag:"快递公司"`                           // 快递公司
+	CTime        string `json:"c_time" tag:"创建时间"`                              // 创建时间
 }
+
+var FilePath = "/home/www/sharelive/src/static/upload/photo/order"
 
 func (c *CarOrderPhoto) TableName() string {
 	return "car_order_photo"
+}
+
+func (c *PhotoCy) AfterFind(tx *gorm.DB) (err error) {
+	c.CTime = utils.FormatDateByString(c.CTime)
+	return
 }
