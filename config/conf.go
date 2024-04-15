@@ -21,9 +21,10 @@ type Mysql struct {
 }
 
 type Redis struct {
-	Host string `json:"host"`
-	Db   string `json:"db"`
-	Port int    `json:"port"`
+	Host     string `json:"host"`
+	Db       int    `json:"db"`
+	Port     int    `json:"port"`
+	Password string `json:"Password"`
 }
 
 type Logger struct {
