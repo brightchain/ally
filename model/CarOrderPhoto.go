@@ -1,11 +1,5 @@
 package model
 
-import (
-	"ally/utils"
-
-	"gorm.io/gorm"
-)
-
 type CarOrderPhoto struct {
 	Id           int32  `gorm:"column:id;primary_key;AUTO_INCREMENT;NOT NULL"`
 	OrderNo      string `gorm:"column:order_no;NOT NULL;comment:'订单编号'"`
@@ -72,9 +66,4 @@ var FilePath = "/home/www/sharelive/src/static/upload/photo/order"
 
 func (c *CarOrderPhoto) TableName() string {
 	return "car_order_photo"
-}
-
-func (c *PhotoCy) AfterFind(tx *gorm.DB) (err error) {
-	c.CTime = utils.FormatDateByString(c.CTime)
-	return
 }

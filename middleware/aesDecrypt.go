@@ -26,6 +26,7 @@ func AesDecrypt() gin.HandlerFunc {
 			c.Abort()
 		}
 		c.Set("decrypt", decrypt)
+		c.Set("encrypt", str)
 		c.Next()
 	}
 }
