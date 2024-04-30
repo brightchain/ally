@@ -45,17 +45,20 @@ func PhotoOrderCy(c *gin.Context) {
 		tx.Where(where, vl)
 	}
 	var orders []model.PhotoCy
-	tx.Find(&orders)
-	if len(orders) == 0 {
-		c.String(200, "数据不存在！")
-		return
+
+	tx.Order("id asc").Find(&orders)
+	data := make([]model.PhotoOrder, len(orders))
+	for k, v := range orders {
+		data[k] = model.FormatDataCy(v)
 	}
+
 	path := "./storage/app/public"
 	currentTime := time.Now()
 	r := rand.New(rand.NewSource(currentTime.UnixNano()))
 	name := fmt.Sprintf("%s%d", currentTime.Format("20060102150405"), r.Int63n(1000))
 	fileName := path + "/" + name + ".xlsx"
-	utils.SaveFile(orders, fileName)
+	utils.SaveFile(data, fileName)
+
 	zipName := path + "/" + name + ".zip"
 	newZipFile, err := os.Create(zipName)
 	if err != nil {
@@ -72,10 +75,13 @@ func PhotoOrderCy(c *gin.Context) {
 		c.String(200, "zip 压缩失败")
 		return
 	}
-	for _, order := range orders {
+	for _, order := range data {
 		name := strings.ToLower(order.OrderNo)
 		fileName := model.FilePath + "/" + name + "/" + order.ProId + ".jpeg"
 		zName := order.Uid + " " + order.Contact + " " + name + "+" + order.ProName + ".jpeg"
+		if order.Remark != "" {
+			zName = order.Remark + " " + name + "+" + order.ProName + ".jpeg"
+		}
 		err = utils.AddFileToZip(zipWriter, fileName, zName)
 		if err != nil {
 			slog.Warn("压缩失败", err)
@@ -85,21 +91,22 @@ func PhotoOrderCy(c *gin.Context) {
 	if err != nil {
 		newZipFile.Close()
 		os.Remove(zipName)
+		os.Remove(fileName)
 		c.String(200, "zip 压缩失败")
 		return
 	}
 
-	upData := map[string]interface{}{
-		"status": 1,
-		"u_time": currentTime.Unix(),
-	}
+	// upData := map[string]interface{}{
+	// 	"status": 1,
+	// 	"u_time": currentTime.Unix(),
+	// }
 
-	result := tx.Updates(upData)
-	if result.Error != nil {
-		slog.Error("更新失败", result.Error)
-		c.String(200, "更新失败")
-		return
-	}
+	// result := tx.Updates(upData)
+	// if result.Error != nil {
+	// 	slog.Error("更新失败", result.Error)
+	// 	c.String(200, "更新失败")
+	// 	return
+	// }
 
 	config.RedisClient.Set(c, md5str, zipName, 7*24*time.Hour)
 

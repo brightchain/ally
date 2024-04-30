@@ -14,6 +14,5 @@ func addApiRoute(r *gin.Engine) {
 	apiGroup.Use(middleware.AesDecrypt())
 	{
 		apiGroup.POST("/downzip", api.PhotoOrderCy)
-
 	}
 }

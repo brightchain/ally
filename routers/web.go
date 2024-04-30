@@ -23,6 +23,7 @@ func addWebRoute(r *gin.Engine) {
 		export.GET("/fjpa", controllers.Fjpa)
 		export.GET("/xinhua", controllers.Xinhua)
 		export.GET("/ydln", controllers.Ydln)
+		export.GET("/shtp", controllers.ShTp)
 		export.GET("/excel-down", controllers.ExcelDown)
 	}
 

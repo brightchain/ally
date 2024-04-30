@@ -1,5 +1,10 @@
 package model
 
+import (
+	"ally/utils"
+	"encoding/json"
+)
+
 type CarOrderPhoto struct {
 	Id           int32  `gorm:"column:id;primary_key;AUTO_INCREMENT;NOT NULL"`
 	OrderNo      string `gorm:"column:order_no;NOT NULL;comment:'订单编号'"`
@@ -62,8 +67,97 @@ type PhotoCy struct {
 	CTime        string `json:"c_time" tag:"创建时间"`                              // 创建时间
 }
 
+type PhotoOrder struct {
+	OrderNo      string `json:"order_no" tag:"订单编号"`                            // 订单编号
+	Uid          string `json:"uid" tag:"用户id" exp:"1"`                         // 订单编号
+	BatchNum     string `json:"batch_num" tag:"优惠券批次号" exp:"1"`                 // 优惠券批次号
+	ProName      string `json:"pro_name" tag:"产品名称"`                            // 产品名称
+	ProId        string `json:"pro_id" gorm:"column:pro_id" tag:"产品id" exp:"1"` // 产品名称
+	Contact      string `json:"contact" tag:"收货人"`                              // 收货人
+	Mobile       string `json:"mobile" tag:"收货手机"`                              // 收货手机
+	Province     string `json:"province" tag:"省"`                               // 省
+	City         string `json:"city" tag:"市"`                                   // 市
+	Area         string `json:"area" tag:"区"`                                   // 区
+	Address      string `json:"address" tag:"详细地址"`                             // 详细地址
+	CustomerInfo string `json:"customer_info" tag:"客户信息" exp:"1"`               // 客户信息
+	WorkNum      string `json:"work_num" tag:"客户工号"`                            // 客户工号
+	ShipNo       string `json:"ship_no" tag:"快递单号"`                             // 快递单号
+	ShipName     string `json:"ship_name" tag:"快递公司"`                           // 快递公司
+	CTime        string `json:"c_time" tag:"创建时间"`                              // 创建时间
+	Remark       string `json:"remark" tag:"备注"`
+	Cus_contact  string `json:"cus_contact" tag:"客户姓名"`
+	Cus_mobile   string `json:"cus_mobile" tag:"客户手机"`
+	Company      string `json:"company" tag:"客户"`
+}
+
+type CustomerInfo struct {
+	Contact string `json:"contact" tag:"客户姓名"`
+	Mobile  string `json:"mobile" tag:"客户手机"`
+	WorkNum string `json:"work_num" tag:"客户工号"`
+}
+
 var FilePath = "/home/www/sharelive/src/static/upload/photo/order"
 
 func (c *CarOrderPhoto) TableName() string {
 	return "car_order_photo"
+}
+
+func FormatDataCy(p PhotoCy) PhotoOrder {
+	p.CTime = utils.FormatDateByString(p.CTime)
+	var c CustomerInfo
+	json.Unmarshal([]byte(p.CustomerInfo), &c)
+	if p.WorkNum == "" {
+		p.WorkNum = p.Uid
+	}
+	remark := ""
+	if c.Contact != "" {
+		remark = p.WorkNum + " " + c.Contact + " " + c.Mobile
+	}
+	company := getCompany(p.BatchNum)
+
+	return PhotoOrder{
+		OrderNo:      p.OrderNo,
+		Uid:          p.Uid,
+		BatchNum:     p.BatchNum,
+		ProName:      p.ProName,
+		ProId:        p.ProId,
+		Contact:      p.Contact,
+		Mobile:       p.Mobile,
+		Province:     p.Province,
+		City:         p.City,
+		Area:         p.Area,
+		Address:      p.Address,
+		CustomerInfo: p.CustomerInfo,
+		WorkNum:      p.WorkNum,
+		ShipNo:       p.ShipNo,
+		ShipName:     p.ShipName,
+		CTime:        p.CTime,
+		Remark:       remark,
+		Cus_contact:  c.Contact,
+		Cus_mobile:   c.Mobile,
+		Company:      company,
+	}
+}
+
+func getCompany(b string) string {
+	var company string
+	switch b {
+	case "P2209270911":
+		company = "太平"
+	case "P2210271539":
+		company = "太平"
+	case "B230224114":
+		company = "福德生命"
+	case "B230309115":
+		company = "福德生命"
+	case "B2304201107":
+		company = "中信"
+	case "B231103578":
+		company = "手提袋"
+	case "P2402191120":
+		company = "英大人寿"
+	default:
+		company = ""
+	}
+	return company
 }
