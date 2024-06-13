@@ -17,6 +17,9 @@ func addWebRoute(r *gin.Engine) {
 	r.GET("/hnkj", controllers.Hnkj)
 	r.GET("/wj", controllers.Smwj)
 	r.GET("/photo-clear", controllers.PhotoDirClear)
+	r.GET("/album-clear", controllers.AlbumDirClear)
+	r.GET("/calendar-clear", controllers.CalendarDirClear)
+	r.GET("/tshirt-clear", controllers.TshirtDirClear)
 
 	export := r.Group("/export")
 	export.Use(middleware.ExportExport())

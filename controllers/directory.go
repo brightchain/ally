@@ -10,15 +10,95 @@ import (
 )
 
 func PhotoDirClear(c *gin.Context) {
-	dirPath := "/home/www/sharelive/src/static/upload/photo/order"
+	dirPath := "/home/www/car/static/upload/photo/order"
 	duration := time.Hour * 24 * 30 * 6
 
+	err := deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+	//清空临时文件
+	dirPath = "/home/www/car/static/upload/photo/temp"
+	duration = time.Hour * 24 * 30
+	err = deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+
+	c.String(http.StatusOK, "OK")
+}
+
+func AlbumDirClear(c *gin.Context) {
+	dirPath := "/home/www/car/static/upload/album/order"
+	duration := time.Hour * 24 * 30 * 6
+
+	err := deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+	//清空临时文件
+	dirPath = "/home/www/car/static/upload/album/temp"
+	duration = time.Hour * 24 * 30
+	err = deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+
+	c.String(http.StatusOK, "OK")
+}
+
+func CalendarDirClear(c *gin.Context) {
+	dirPath := "/home/www/car/static/upload/calendar/order"
+	duration := time.Hour * 24 * 30 * 6
+
+	err := deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+	//清空临时文件
+	dirPath = "/home/www/car/static/upload/calendar/temp"
+	duration = time.Hour * 24 * 30
+	err = deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+
+	c.String(http.StatusOK, "OK")
+}
+
+func TshirtDirClear(c *gin.Context) {
+	dirPath := "/home/www/car/static/upload/tshirt/order"
+	duration := time.Hour * 24 * 30 * 6
+
+	err := deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+	//清空临时文件
+	dirPath = "/home/www/car/static/upload/tshirt/temp"
+	duration = time.Hour * 24 * 30
+	err = deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+
+	c.String(http.StatusOK, "OK")
+}
+
+func deleteOldDir(dirPath string, duration time.Duration) error {
 	now := time.Now()
 	files, err := os.ReadDir(dirPath)
 
 	if err != nil {
-		c.String(http.StatusOK, "获取目录列表失败")
-		c.Abort()
+		return err
 	}
 
 	for _, file := range files {
@@ -36,8 +116,9 @@ func PhotoDirClear(c *gin.Context) {
 	}
 
 	if err != nil {
-		c.String(http.StatusOK, err.Error())
+		return err
 	}
 
-	c.String(http.StatusOK, "OK")
+	return nil
+
 }
