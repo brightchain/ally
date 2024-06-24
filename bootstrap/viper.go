@@ -1,4 +1,4 @@
-package bootstarp
+package bootstrap
 
 import "ally/pkg/viperConf"
 
