@@ -1,22 +1,17 @@
 package main
 
 import (
-	"ally/config"
-	"ally/model"
+	"ally/bootstrap"
 	"ally/routers"
 	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
-func init() {
-	config.SetupSlog()
-	config.InitSingleRedis()
-	model.InitDb()
-}
-
 func main() {
+	bootstrap.SetupViper()
+	bootstrap.SetupSlog()
+	bootstrap.SetupDatabase()
 	gin.SetMode(os.Getenv("GIN_MODE"))
-	defer config.RedisClient.Close()
 	routers.Run()
 }

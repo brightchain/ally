@@ -17,7 +17,7 @@ type Mysql struct {
 	Password string `json:"password"`
 	Port     int    `json:"port"`
 	Host     string `json:"host"`
-	Db       string `json:"db"`
+	DbName   string `json:"dbName"`
 }
 
 type Redis struct {
