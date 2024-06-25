@@ -2,7 +2,7 @@ package route
 
 import (
 	"ally/middleware"
-	"ally/pkg/viperConf"
+	"ally/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,5 +16,5 @@ func SetRoute(r *gin.Engine) {
 func Run(r *gin.Engine) {
 	r.Static("/public/storage", "./storage/app/public")
 	r.Use(middleware.Session("SESSION_SECRET"))
-	r.Run(viperConf.Data.GetString("app.port"))
+	r.Run(config.Data.GetString("app.port"))
 }

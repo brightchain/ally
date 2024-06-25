@@ -1,8 +1,8 @@
 package database
 
 import (
+	"ally/pkg/config"
 	"ally/pkg/logger"
-	"ally/pkg/viperConf"
 	"database/sql"
 	"log/slog"
 	"strconv"
@@ -16,8 +16,8 @@ var DB *sql.DB
 
 func Initialize() {
 	var err error
-	var conf viperConf.Mysql
-	mysqlConf := viperConf.Data.Sub("database.db1")
+	var conf config.Mysql
+	mysqlConf := config.Data.Sub("database.db1")
 	mysqlMap := mysqlConf.AllSettings()
 	mapstructure.Decode(mysqlMap, &conf)
 

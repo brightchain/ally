@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"ally/pkg/viperConf"
+	"ally/pkg/config"
 	"context"
 	"fmt"
 	"log/slog"
@@ -14,8 +14,8 @@ import (
 var Client *goRedis.Client
 
 func Initialize() {
-	var redisConf viperConf.Redis
-	rConf := viperConf.Data.Sub("redis")
+	var redisConf config.Redis
+	rConf := config.Data.Sub("redis")
 	redisMap := rConf.AllSettings()
 	mapstructure.Decode(redisMap, &redisConf)
 	redisAddr := fmt.Sprintf("%s:%d", redisConf.Host, redisConf.Port)

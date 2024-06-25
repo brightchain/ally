@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"ally/pkg/viperConf"
+	"ally/pkg/config"
 	"io"
 	"log/slog"
 	"os"
@@ -10,7 +10,7 @@ import (
 )
 
 func Initialize() {
-	logConf := viperConf.Data.Sub("logger")
+	logConf := config.Data.Sub("logger")
 	filename := logConf.GetString("filename")
 	maxSize := logConf.GetInt("maxSize")
 	maxBackups := logConf.GetInt("maxBackups")

@@ -1,7 +1,7 @@
 package model
 
 import (
-	"ally/pkg/viperConf"
+	"ally/pkg/config"
 	"errors"
 	"fmt"
 	"log"
@@ -31,11 +31,11 @@ var (
 )
 
 func InitDb() {
-	dbConf := viperConf.Data.Sub("database")
+	dbConf := config.Data.Sub("database")
 	confMap := dbConf.AllSettings()
 
 	for k, v := range confMap {
-		var conf viperConf.Mysql
+		var conf config.Mysql
 		//map[string]interface{}转结构体
 		mapstructure.Decode(v, &conf)
 		slog.Info("数据库信息", conf)
@@ -44,7 +44,7 @@ func InitDb() {
 
 }
 
-func connByConf(key string, input viperConf.Mysql) {
+func connByConf(key string, input config.Mysql) {
 	db, err := connectDB(input)
 	if err != nil {
 		slog.Error("数据库链接失败!", err)
@@ -61,8 +61,8 @@ func connByConf(key string, input viperConf.Mysql) {
 	RDB[key] = rdb
 }
 
-func connectDB(conf viperConf.Mysql) (*gorm.DB, error) {
-	logConf := viperConf.Data.Sub("logger")
+func connectDB(conf config.Mysql) (*gorm.DB, error) {
+	logConf := config.Data.Sub("logger")
 	filename := logConf.GetString("gormFile")
 	level := logConf.GetString("filename")
 	logOps := logger.Config{
