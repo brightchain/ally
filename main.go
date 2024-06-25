@@ -11,7 +11,8 @@ import (
 func main() {
 	bootstrap.SetupViper()
 	bootstrap.SetupSlog()
-	bootstrap.SetupDatabase()
+	bootstrap.SetupModel()
+	//bootstrap.SetupDatabase()
 	gin.SetMode(os.Getenv("GIN_MODE"))
 	routers.Run()
 }
