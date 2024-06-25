@@ -2,7 +2,7 @@ package main
 
 import (
 	"ally/bootstrap"
-	"ally/routers"
+	"ally/pkg/route"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -14,5 +14,6 @@ func main() {
 	bootstrap.SetupModel()
 	//bootstrap.SetupDatabase()
 	gin.SetMode(os.Getenv("GIN_MODE"))
-	routers.Run()
+	r := bootstrap.SetupRoute()
+	route.Run(r)
 }

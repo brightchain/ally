@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func addApiRoute(r *gin.Engine) {
+func RegisterApiRouters(r *gin.Engine) {
 	r.POST("/zip", api.Zip)
 	r.POST("/redis", api.Redis)
 	apiGroup := r.Group("/api")
