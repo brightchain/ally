@@ -1,4 +1,4 @@
-package viperConf
+package config
 
 type AppConfig struct {
 	App    App    `json:"app"`

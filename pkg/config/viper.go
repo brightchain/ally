@@ -1,4 +1,4 @@
-package viperConf
+package config
 
 import (
 	"os"

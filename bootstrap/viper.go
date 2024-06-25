@@ -1,8 +1,8 @@
 package bootstrap
 
-import "ally/pkg/viperConf"
+import "ally/pkg/config"
 
 func SetupViper() {
-	viperConf.Initialize()
-	go viperConf.DynamicReloadConfig()
+	config.Initialize()
+	//go viperConf.DynamicReloadConfig()
 }
