@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"ally/config"
-	"ally/model"
+	"ally/pkg/config"
+	"ally/pkg/model"
 	"ally/utils/crypto"
 	"encoding/json"
 	"fmt"
@@ -37,7 +37,7 @@ func (a *AesEcb) Encrypt(c *gin.Context) {
 
 	slog.Info("str2", str)
 
-	key := []byte(config.GlobalConfig.GetString("crypto.aes-128-ecb"))
+	key := []byte(config.Data.GetString("crypto.aes-128-ecb"))
 
 	encrypt := crypto.AesEncryptECB(str, key)
 	if err != nil {
@@ -53,14 +53,14 @@ func (a *AesEcb) Down(c *gin.Context) {
 	data, _ := c.GetRawData()
 	var body map[string]string
 	_ = json.Unmarshal(data, &body)
-	key := []byte(config.GlobalConfig.GetString("crypto.aes-128-ecb"))
+	key := []byte(config.Data.GetString("crypto.aes-128-ecb"))
 	str := string(body["encrypt"])
 
 	decrypt := crypto.AesDecryptECB(str, key)
 	var par map[string]string
 	_ = json.Unmarshal(decrypt, &par)
 	slog.Info("解密内容", par)
-	db := model.RDBs[model.MASTER]
+	db := model.RDB[model.MASTER]
 	where := " 1=1 "
 	var values []interface{}
 	for k, v := range par {

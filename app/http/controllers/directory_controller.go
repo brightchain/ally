@@ -9,7 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func PhotoDirClear(c *gin.Context) {
+type DirectoryClear struct{}
+
+func (*DirectoryClear) PhotoDirClear(c *gin.Context) {
 	dirPath := "/home/www/car/static/upload/photo/order"
 	duration := time.Hour * 24 * 30 * 6
 
@@ -30,7 +32,7 @@ func PhotoDirClear(c *gin.Context) {
 	c.String(http.StatusOK, "OK")
 }
 
-func AlbumDirClear(c *gin.Context) {
+func (*DirectoryClear) AlbumDirClear(c *gin.Context) {
 	dirPath := "/home/www/car/static/upload/album/order"
 	duration := time.Hour * 24 * 30 * 6
 
@@ -51,7 +53,7 @@ func AlbumDirClear(c *gin.Context) {
 	c.String(http.StatusOK, "OK")
 }
 
-func CalendarDirClear(c *gin.Context) {
+func (*DirectoryClear) CalendarDirClear(c *gin.Context) {
 	dirPath := "/home/www/car/static/upload/calendar/order"
 	duration := time.Hour * 24 * 30 * 6
 
@@ -72,7 +74,7 @@ func CalendarDirClear(c *gin.Context) {
 	c.String(http.StatusOK, "OK")
 }
 
-func TshirtDirClear(c *gin.Context) {
+func (*DirectoryClear) TshirtDirClear(c *gin.Context) {
 	dirPath := "/home/www/car/static/upload/tshirt/order"
 	duration := time.Hour * 24 * 30 * 6
 

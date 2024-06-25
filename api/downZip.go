@@ -1,8 +1,9 @@
 package api
 
 import (
-	"ally/config"
-	"ally/model"
+	"ally/app/http/models"
+	"ally/pkg/goredis"
+	"ally/pkg/model"
 	"ally/utils"
 	"archive/zip"
 	"crypto/md5"
@@ -24,7 +25,7 @@ func PhotoOrderCy(c *gin.Context) {
 	encrypt, _ := c.Get("encrypt")
 	has := md5.Sum([]byte(encrypt.(string)))
 	md5str := fmt.Sprintf("%x", has)
-	n, err := config.RedisClient.Get(c, md5str).Result()
+	n, err := goredis.Client.Get(c, md5str).Result()
 	if err != redis.Nil {
 		c.String(200, n)
 		return
@@ -35,8 +36,8 @@ func PhotoOrderCy(c *gin.Context) {
 	_ = json.Unmarshal(str, &param)
 	slog.Info("优化", param)
 
-	db := model.RDBs[model.MASTER]
-	tx := db.Db.Model(&model.CarOrderPhoto{})
+	db := model.RDB[model.MASTER]
+	tx := db.Db.Model(&models.CarOrderPhoto{})
 	for k, v := range param {
 		//tmp := strings.Split(k, " ")
 		//where := fmt.Sprintf("%s %s ?", tmp[0], tmp[1])
@@ -44,12 +45,12 @@ func PhotoOrderCy(c *gin.Context) {
 		vl := strings.Split(v, ",")
 		tx.Where(where, vl)
 	}
-	var orders []model.PhotoCy
+	var orders []models.PhotoCy
 
 	tx.Order("id asc").Find(&orders)
-	data := make([]model.PhotoOrder, len(orders))
+	data := make([]models.PhotoOrder, len(orders))
 	for k, v := range orders {
-		data[k] = model.FormatDataCy(v)
+		data[k] = models.FormatDataCy(v)
 	}
 
 	path := "./storage/app/public"
@@ -77,7 +78,7 @@ func PhotoOrderCy(c *gin.Context) {
 	}
 	for _, order := range data {
 		name := strings.ToLower(order.OrderNo)
-		fileName := model.FilePath + "/" + name + "/" + order.ProId + ".jpeg"
+		fileName := models.FilePath + "/" + name + "/" + order.ProId + ".jpeg"
 		zName := order.Uid + " " + order.Contact + " " + name + "+" + order.ProName + ".jpeg"
 		if order.Remark != "" {
 			zName = order.Remark + " " + name + "+" + order.ProName + ".jpeg"
@@ -108,7 +109,7 @@ func PhotoOrderCy(c *gin.Context) {
 	// 	return
 	// }
 
-	config.RedisClient.Set(c, md5str, zipName, 7*24*time.Hour)
+	goredis.Client.Set(c, md5str, zipName, 7*24*time.Hour)
 
 	c.String(200, zipName)
 }
@@ -147,8 +148,8 @@ func Zip(c *gin.Context) {
 }
 
 func Redis(c *gin.Context) {
-	config.RedisClient.Set(c, "key", "value", 60*time.Second)
-	val2, err := config.RedisClient.Get(c, "key").Result()
+	goredis.Client.Set(c, "key", "value", 60*time.Second)
+	val2, err := goredis.Client.Get(c, "key").Result()
 	if err == redis.Nil {
 		fmt.Println("[ERROR] - Key [name] not exist")
 	} else if err != nil {

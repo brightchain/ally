@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"ally/config"
+	"ally/pkg/config"
 	"ally/utils/crypto"
 	"encoding/json"
 
@@ -13,7 +13,7 @@ func AesDecrypt() gin.HandlerFunc {
 		data, _ := c.GetRawData()
 		var body map[string]string
 		_ = json.Unmarshal(data, &body)
-		key := []byte(config.GlobalConfig.GetString("crypto.aes-128-ecb"))
+		key := []byte(config.Data.GetString("crypto.aes-128-ecb"))
 		str := string(body["encrypt"])
 
 		decrypt := crypto.AesDecryptECB(str, key)

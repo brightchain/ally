@@ -1,7 +1,7 @@
 package route
 
 import (
-	"ally/middleware"
+	"ally/app/http/middleware"
 	"ally/pkg/config"
 
 	"github.com/gin-gonic/gin"

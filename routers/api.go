@@ -2,7 +2,7 @@ package routers
 
 import (
 	"ally/api"
-	"ally/middleware"
+	"ally/app/http/middleware"
 
 	"github.com/gin-gonic/gin"
 )
