@@ -1,4 +1,4 @@
-package redis
+package goredis
 
 import (
 	"ally/pkg/config"
@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	goRedis "github.com/redis/go-redis/v9"
+	"github.com/redis/go-redis/v9"
 )
 
-var Client *goRedis.Client
+var Client *redis.Client
 
 func Initialize() {
 	var redisConf config.Redis
@@ -20,7 +20,7 @@ func Initialize() {
 	mapstructure.Decode(redisMap, &redisConf)
 	redisAddr := fmt.Sprintf("%s:%d", redisConf.Host, redisConf.Port)
 	slog.Info("连接数据：%s", redisAddr)
-	Client = goRedis.NewClient(&goRedis.Options{
+	Client = redis.NewClient(&redis.Options{
 		Addr:     redisAddr,
 		Password: redisConf.Password,
 		DB:       redisConf.Db,

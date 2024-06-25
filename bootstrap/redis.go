@@ -1,7 +1,7 @@
 package bootstrap
 
-import "ally/pkg/redis"
+import "ally/pkg/goredis"
 
 func SetupRedis() {
-	redis.Initialize()
+	goredis.Initialize()
 }
