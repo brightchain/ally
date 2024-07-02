@@ -10,26 +10,22 @@ import (
 )
 
 func Initialize() {
-	logConf := config.Data.Sub("logger")
-	filename := logConf.GetString("filename")
-	maxSize := logConf.GetInt("maxSize")
-	maxBackups := logConf.GetInt("maxBackups")
-	maxAge := logConf.GetInt("maxAge")
-	level := logConf.GetString("level")
+
 	// 初始化日志
 	logFile := &lumberjack.Logger{
-		Filename:   filename,   // 日志文件的位置
-		MaxSize:    maxSize,    // 文件最大尺寸（以MB为单位）
-		MaxBackups: maxBackups, // 保留的最大旧文件数量
-		MaxAge:     maxAge,     // 保留旧文件的最大天数
-		Compress:   true,       // 是否压缩/归档旧文件
-		LocalTime:  true,       // 使用本地时间创建时间戳
+		Filename:   config.GetString("logger.name"),          // 日志文件的位置
+		MaxSize:    config.Viper.GetInt("logger.size"),       // 文件最大尺寸（以MB为单位）
+		MaxBackups: config.Viper.GetInt("logger.maxBackups"), // 保留的最大旧文件数量
+		MaxAge:     config.Viper.GetInt("logger.maxAge"),     // 保留旧文件的最大天数
+		Compress:   true,                                     // 是否压缩/归档旧文件
+		LocalTime:  true,                                     // 使用本地时间创建时间戳
 	}
+
 	logOpts := slog.HandlerOptions{
 		AddSource: true,
 		Level:     slog.LevelDebug,
 	}
-
+	level := config.GetString("logger.level")
 	switch level {
 	case "debug":
 		logOpts.Level = slog.LevelDebug
