@@ -15,6 +15,6 @@ func SetRoute(r *gin.Engine) {
 
 func Run(r *gin.Engine) {
 	r.Static("/public/storage", "./storage/app/public")
-	r.Use(middleware.Session("SESSION_SECRET"))
+	r.Use(middleware.StartSession())
 	r.Run(config.GetString("app.port"))
 }
