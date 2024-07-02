@@ -2,14 +2,17 @@ package main
 
 import (
 	"ally/bootstrap"
+	"ally/config"
 	"ally/pkg/route"
 	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
+func init(){
+	config.Initialize()
+}
 func main() {
-	bootstrap.SetupViper()
 	bootstrap.SetupSlog()
 	bootstrap.SetupModel()
 	//bootstrap.SetupDatabase()
