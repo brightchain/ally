@@ -7,23 +7,17 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/redis/go-redis/v9"
 )
 
 var Client *redis.Client
 
 func Initialize() {
-	var redisConf config.Redis
-	rConf := config.Data.Sub("redis")
-	redisMap := rConf.AllSettings()
-	mapstructure.Decode(redisMap, &redisConf)
-	redisAddr := fmt.Sprintf("%s:%d", redisConf.Host, redisConf.Port)
-	slog.Info("连接数据：%s", redisAddr)
+
 	Client = redis.NewClient(&redis.Options{
-		Addr:     redisAddr,
-		Password: redisConf.Password,
-		DB:       redisConf.Db,
+		Addr:     fmt.Sprintf("%v:%v", config.GetString("redis.host"), config.GetString("redis.port")),
+		Password: config.GetString("redis.password"),
+		DB:       config.GetInt("redis.db"),
 	})
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
