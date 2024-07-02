@@ -13,7 +13,7 @@ func AesDecrypt() gin.HandlerFunc {
 		data, _ := c.GetRawData()
 		var body map[string]string
 		_ = json.Unmarshal(data, &body)
-		key := []byte(config.Data.GetString("crypto.aes-128-ecb"))
+		key := []byte(config.GetString("app.aes-128-ecb"))
 		str := string(body["encrypt"])
 
 		decrypt := crypto.AesDecryptECB(str, key)

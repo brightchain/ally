@@ -9,7 +9,7 @@ import (
 )
 
 // Store gorilla sessions 的存储库
-var Store = sessions.NewCookieStore([]byte("33446a9dcf9ea060a0a6532b166da32f304af0de"))
+var Store = sessions.NewCookieStore([]byte(config.GetString("app.key")))
 
 // Session 当前会话
 var Session *sessions.Session

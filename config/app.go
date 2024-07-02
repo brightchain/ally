@@ -20,5 +20,8 @@ func init() {
 
 		// gorilla/sessions 在 Cookie 中加密数据时使用
 		"key": config.Env("APP_KEY", "33446a9dcf9ea060a0a6532b166da32f304af0de"),
+
+		// age_128_key
+		"aes_128_key": config.Env("AES_128_KEY", "1234567890123456"),
 	})
 }
