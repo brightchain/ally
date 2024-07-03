@@ -30,7 +30,7 @@ var (
 )
 
 func InitDb() {
-	for k, _ := range config.GetStringMap("databases") {
+	for k:= range config.GetStringMap("databases") {
 		connByConf(k)
 	}
 

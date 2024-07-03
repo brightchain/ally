@@ -6,7 +6,7 @@ import (
 
 func init() {
 	strMap := make(config.StrMap)
-	for k, _ := range config.GetStringMap("databases") {
+	for k := range config.GetStringMap("databases") {
 		var value = map[string]interface{}{
 			// 数据库连接信息
 			"host":     config.Env("databases."+k+".host", "127.0.0.1"),
