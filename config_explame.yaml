@@ -1,0 +1,33 @@
+app:
+  name: ally  
+  port: 8080  # 服务运行端口
+  env: dev  # 当前环境，用以区分多环境
+  debug: true # 是否进入调试模式
+  key: 33446a9dcf9ea060a0a6532b166da32f304af0de # key 在 Cookie 中加密数据时使用
+databases:  #数据库配置
+  db:
+    username: user #数据库用户名
+    password: password #数据库密码
+    host: 127.0.0.1 #数据库地址
+    port: 3306 #数据库端口
+    database: db #数据库名称
+  db1:
+    username: user #数据库用户名
+    password: password  #数据库密码
+    host: 127.0.0.1 #数据库地址
+    port: 3306 #数据库端口
+    database: db1 #数据库名称
+redis: #redis配置
+  host: 127.0.0.1 #redis地址
+  port: 6379 #redis端口
+  db: 1 #redis数据库
+  password: 123456 #redis密码
+crypto: #加密配置
+  aes-128-key: 1234567890123456 
+logger:
+  level: debug  #日志记录级别 debug,info,warn,error  
+  filename: ./storage/logs/app.log     #日志文件的位置
+  gormFile: ./storage/logs/gorm.log     #日志文件的位置
+  maxSize: 5              #文件最大尺寸（以MB为单位）
+  maxBackups: 10           #保留的最大旧文件数量
+  maxAge: 30               #保留旧文件的最大天数

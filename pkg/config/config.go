@@ -19,19 +19,19 @@ func init() {
 	// 1. 初始化 Viper 库
 	Viper = viper.New()
 	// 2. 设置文件名称
-	Viper.SetConfigName(".env")
+	Viper.SetConfigName("config")
 	// 3. 配置类型，支持 "json", "toml", "yaml", "yml", "properties",
 	//             "props", "prop", "env", "dotenv"
-	Viper.SetConfigType("env")
+	Viper.SetConfigType("yaml")
 	// 4. 环境变量配置文件查找的路径，相对于 main.go
 	Viper.AddConfigPath(".")
 
 	// 5. 开始读根目录下的 .env 文件，读不到会报错
 	err := Viper.ReadInConfig()
-	slog.Error("读取配置文件出错！", err)
+	slog.Error("读取配置文件", err)
 
 	// 6. 设置环境变量前缀，用以区分 Go 的系统环境变量
-	Viper.SetEnvPrefix("appenv")
+	Viper.SetEnvPrefix("VIPER")
 	// 7. Viper.Get() 时，优先读取环境变量
 	Viper.AutomaticEnv()
 }
@@ -64,6 +64,12 @@ func Get(path string, defaultValue ...interface{}) interface{} {
 // GetString 获取 String 类型的配置信息
 func GetString(path string, defaultValue ...interface{}) string {
 	return cast.ToString(Get(path, defaultValue...))
+}
+
+
+// GetStringMap 获取 map[string]interface{} 类型的配置信息
+func GetStringMap(path string, defaultValue ...interface{}) map[string]interface{} {
+	return cast.ToStringMap(Get(path, defaultValue...))
 }
 
 // GetInt 获取 Int 类型的配置信息
