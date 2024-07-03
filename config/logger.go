@@ -6,18 +6,21 @@ func init() {
 	config.Add("logger", config.StrMap{
 
 		//日志文件路径
-		"name": config.Env("LOGGER_NAME", "ally"),
+		"name": config.Env("logger.filename", "./app.log"),
 
 		// 文件最大尺寸（以MB为单位）
-		"size": config.Env("LOGGER_SIZE", 4),
+		"size": config.Env("logger.maxSize", 4),
 
 		// 保留的最大旧文件数量
-		"maxBackups": config.Env("LOGGER_MAX_BACKUPS", 10),
+		"maxBackups": config.Env("logger.maxBackups", 10),
 
 		// 保留旧文件的最大天数
-		"maxAge": config.Env("LOGGER_MAX_AGE", 30),
+		"maxAge": config.Env("logger.maxAge", 30),
 
 		// 日志模式
-		"level": config.Env("LOGGER_LEVEL", "debug"),
+		"level": config.Env("logger.level", "debug"),
+
+		//gorm日志文件路径
+		"gormName": config.Env("logger.gormFile", "./gorm.log"),
 	})
 }
