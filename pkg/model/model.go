@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -26,26 +25,19 @@ type RDBManager struct {
 
 // db连接
 var (
-	MASTER = "db1"                    // 默认主数据源
+	MASTER = "db"                     // 默认主数据源
 	RDB    = map[string]*RDBManager{} // 初始化时加载数据源到集合
 )
 
 func InitDb() {
-	dbConf := config.Data.Sub("database")
-	confMap := dbConf.AllSettings()
-
-	for k, v := range confMap {
-		var conf config.Mysql
-		//map[string]interface{}转结构体
-		mapstructure.Decode(v, &conf)
-		slog.Info("数据库信息", conf)
-		connByConf(k, conf)
+	for k, _ := range config.GetStringMap("databases") {
+		connByConf(k)
 	}
 
 }
 
-func connByConf(key string, input config.Mysql) {
-	db, err := connectDB(input)
+func connByConf(key string) {
+	db, err := connectDB(key)
 	if err != nil {
 		slog.Error("数据库链接失败!", err)
 		return
@@ -61,10 +53,10 @@ func connByConf(key string, input config.Mysql) {
 	RDB[key] = rdb
 }
 
-func connectDB(conf config.Mysql) (*gorm.DB, error) {
-	logConf := config.Data.Sub("logger")
-	filename := logConf.GetString("gormFile")
-	level := logConf.GetString("filename")
+func connectDB(key string) (*gorm.DB, error) {
+
+	filename := config.GetString("logger.gormName")
+	level := config.GetString("logger.level")
 	logOps := logger.Config{
 		SlowThreshold:             time.Second, // Slow SQL threshold
 		LogLevel:                  logger.Info, // Log level(这里记得根据需求改一下)
@@ -89,17 +81,23 @@ func connectDB(conf config.Mysql) (*gorm.DB, error) {
 		log.Fatalf("logger.Setup err: %v", err)
 	}
 	newLogger := logger.New(log.New(f, "\r\n", log.LstdFlags), logOps)
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=true",
-		conf.User,
-		conf.Password,
-		conf.Host,
-		conf.Port,
-		conf.DbName)
-	conn, err := gorm.Open(mysql.New(mysql.Config{DSN: dsn}), &gorm.Config{
+	configPath := "databases." + key
+	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=%v&parseTime=True&loc=Local",
+		config.GetString(configPath+".username"),
+		config.GetString(configPath+".password"),
+		config.GetString(configPath+".host"),
+		config.GetString(configPath+".port"),
+		config.GetString(configPath+".database"),
+		config.GetString(configPath+".charset"))
+	fmt.Printf("数据库%v,%v", key, dsn)
+	gormConfig := mysql.New(mysql.Config{
+		DSN: dsn,
+	})
+	conn, err := gorm.Open(gormConfig, &gorm.Config{
 		Logger: newLogger,
 	})
 	if err != nil {
-		slog.Error("数据库连接失败", err)
+		//slog.Error("数据库连接失败", err)
 		return nil, errors.New("数据库连接失败")
 	}
 
