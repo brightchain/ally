@@ -25,4 +25,3 @@ func init() {
 	}
 	config.Add("databases", strMap)
 }
-

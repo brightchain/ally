@@ -54,7 +54,6 @@ func connByConf(key string) {
 }
 
 func connectDB(key string) (*gorm.DB, error) {
-
 	filename := config.GetString("logger.gormName")
 	level := config.GetString("logger.level")
 	logOps := logger.Config{
@@ -89,7 +88,7 @@ func connectDB(key string) (*gorm.DB, error) {
 		config.GetString(configPath+".port"),
 		config.GetString(configPath+".database"),
 		config.GetString(configPath+".charset"))
-	fmt.Printf("数据库%v,%v", key, dsn)
+	//fmt.Printf("数据库%v,%v", key, dsn)
 	gormConfig := mysql.New(mysql.Config{
 		DSN: dsn,
 	})
