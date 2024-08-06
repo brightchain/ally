@@ -117,10 +117,7 @@ func deleteOldDir(dirPath string, duration time.Duration) error {
 		}
 	}
 
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 
 }
