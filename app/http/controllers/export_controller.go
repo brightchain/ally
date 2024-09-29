@@ -221,7 +221,7 @@ func (*ExportExcel) FjTp(c *gin.Context) {
 
 	var result []Result
 
-	sqlQuery := "select a.order_no, '福建太平10寸照片摆台' as name,a.num,a.order_amount,a.pay_no,if(a.pay_at,FROM_UNIXTIME(a.pay_at),'') as 'pay_at',case a.status when 0 then '未付款' when 1 then '已付款' when 2 then '已完成' when -1 then '已取消' end as 'status',b.name as 'name1',b.contact,b.organ,b.work_num,FROM_UNIXTIME(a.c_time) as 'c_time'  from car_order_gdpa a LEFT JOIN car_order_photo_agent b on (a.uid = b.uid and b.company = 30) where a.pro_id = 'TP001' "
+	sqlQuery := "select a.order_no, '福建太平10寸照片摆台' as name,a.num,a.order_amount,a.pay_no,if(a.pay_at,FROM_UNIXTIME(a.pay_at),'') as 'pay_at',case a.status when 0 then '未付款' when 1 then '已付款' when 2 then '已完成' when -1 then '已取消' end as 'status',b.name as 'name1',b.mobile,b.contact,b.organ,b.work_num,FROM_UNIXTIME(a.c_time) as 'c_time'  from car_order_gdpa a LEFT JOIN car_order_photo_agent b on (a.uid = b.uid and b.company = 30) where a.pro_id = 'TP001' "
 	
 	db := model.RDB[model.MASTER]
 	db.Db.Raw(sqlQuery).Find(&result)
