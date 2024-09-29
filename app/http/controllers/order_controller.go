@@ -47,7 +47,11 @@ func (*PayOrder) GetOrderProduct(c *gin.Context) {
 
 		orderNo := strings.ReplaceAll(cellValue, "`", "")
 		orderType := orderNo[:2]
-		
+		if orderType == "10" {
+			cellValue = row[11]
+			orderNo = strings.ReplaceAll(cellValue, "`", "")
+			orderType = orderNo[:2]
+		}
 		if orderType == "YZ" {
 			err := db.Db.Raw("SELECT * FROM car_shop_yz_order_v WHERE order_no = ?", orderNo).Scan(&result).Error
 			if err != nil {
@@ -71,9 +75,18 @@ func (*PayOrder) GetOrderProduct(c *gin.Context) {
 		} else if orderType == "VC" {
 			err := db.Db.Raw("SELECT * FROM car_vcard_order WHERE order_no = ?", orderNo).Scan(&result).Error
 			if err != nil {
-				log.Printf("Error querying database for ID %s: %v", orderNo, err)
-				continue
+				if row[11] != "" {
+					payNo := strings.ReplaceAll(row[11], "`", "")
+					err = db.Db.Raw("SELECT * FROM car_vcard_order WHERE pay_no = ? and status <> '04'", payNo).Scan(&result).Error
+				}
+				
+				if err != nil {
+					log.Printf("Error querying database for ID %s: %v", orderNo, err)
+					continue
+				}
+				
 			}
+			
 			f.SetCellValue("Sheet1", fmt.Sprintf("M%d", i+1), result["product_name"])
 			f.SetCellValue("Sheet1", fmt.Sprintf("N%d", i+1), 1)
 			f.SetCellValue("Sheet1", fmt.Sprintf("O%d", i+1), result["amount"])
