@@ -38,7 +38,10 @@ func RegisterWebRouters(r *gin.Engine) {
 	r.POST("/aes/aes", aes.Aes)
 	r.POST("/aes/encrypt", aes.Encrypt)
 	r.POST("/aes/dow", aes.Down)
-
+	car := controllers.Car{}
+	r.GET("/car", car.Index)
+	r.GET("/car_type", car.CarModel)
+	r.GET("/car_detail", car.CarDetail)
 	order := controllers.PayOrder{}
 	orderGroup := r.Group("/order")
 	orderGroup.Use(middleware.ExportExport())
