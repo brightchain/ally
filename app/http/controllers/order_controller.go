@@ -3,7 +3,6 @@ package controllers
 import (
 	"ally/pkg/model"
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -12,104 +11,296 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-type PayOrder struct{}
+// OrderType 定义订单类型常量
+const (
+	OrderTypeYZ = "YZ"
+	OrderTypeDD = "DD"
+	OrderTypeDA = "DA"
+	OrderTypeDS = "DS"
+	OrderTypeVC = "VC"
+	OrderTypeGP = "GP"
+	OrderTypeZY = "ZY"
+)
 
-func (*PayOrder) GetOrderProduct(c *gin.Context) {
+// OrderData 存储订单基础信息
+type OrderData struct {
+	RowIndex int    // Excel行索引
+	OrderNo  string // 订单号
+	PayNo    string // 支付号（VC类型可能用到）
+}
+
+// QueryResult 查询结果
+type QueryResult struct {
+	OrderNo     string  `json:"order_no"`
+	ProductName string  `json:"product_name,omitempty"`
+	ProName     string  `json:"pro_name,omitempty"`
+	Amount      int     `json:"amount"`
+	OrderAmount float64 `json:"order_amount"`
+	PayAmount   float64 `json:"pay_amount"`
+	Num         int     `json:"num"`
+	PayNo       string  `json:"pay_no"`
+}
+
+type PayOrder struct {
+}
+
+func (p *PayOrder) GetOrderProduct(c *gin.Context) {
+	// 1. 打开并读取Excel
 	f, err := excelize.OpenFile("order.xlsx")
 	if err != nil {
-		slog.Warn("读取失败！", err)
-		c.String(http.StatusOK, "读取失败")
+		p.handleError(c, "打开Excel文件失败", err)
 		return
 	}
+	defer f.Close()
 
 	rows, err := f.GetRows("Sheet1")
 	if err != nil {
-		slog.Warn("读取失败sheet1！", err)
-		c.String(http.StatusOK, "读取失败")
+		p.handleError(c, "读取工作表失败", err)
 		return
 	}
 
-	db := model.RDB[model.MASTER]
-	for i, row := range rows {
-		if i == 0 { // 跳过标题行
-			continue
-		}
-
-		// 查询数据库
-		var result map[string]interface{}
-		cellValue := ""
-		cellValue = row[10]
-
-		fmt.Printf("行数%v值%v\n", i, cellValue)
-		if cellValue == "" {
-			continue
-		}
-
-		orderNo := strings.ReplaceAll(cellValue, "`", "")
-		orderType := orderNo[:2]
-		if orderType == "10" {
-			cellValue = row[11]
-			orderNo = strings.ReplaceAll(cellValue, "`", "")
-			orderType = orderNo[:2]
-		}
-		if orderType == "YZ" {
-			err := db.Db.Raw("SELECT * FROM car_shop_yz_order_v WHERE order_no = ?", orderNo).Scan(&result).Error
-			if err != nil {
-				log.Printf("Error querying database for ID %s: %v", orderNo, err)
-				continue
-			}
-			f.SetCellValue("Sheet1", fmt.Sprintf("M%d", i+1), result["pro_name"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("N%d", i+1), 1)
-			f.SetCellValue("Sheet1", fmt.Sprintf("O%d", i+1), result["total_amount"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("P%d", i+1), result["pay_amount"])
-		} else if orderType == "DD" || orderType == "DA" {
-			err := db.Db.Raw("SELECT * FROM car_shop_dadi_order WHERE order_no = ?", orderNo).Scan(&result).Error
-			if err != nil {
-				log.Printf("Error querying database for ID %s: %v", orderNo, err)
-				continue
-			}
-			f.SetCellValue("Sheet1", fmt.Sprintf("M%d", i+1), result["product_name"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("N%d", i+1), result["amount"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("O%d", i+1), result["order_amount"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("P%d", i+1), result["pay_amount"])
-		} else if orderType == "VC" {
-			err := db.Db.Raw("SELECT * FROM car_vcard_order WHERE order_no = ?", orderNo).Scan(&result).Error
-			if err != nil {
-				if row[11] != "" {
-					payNo := strings.ReplaceAll(row[11], "`", "")
-					err = db.Db.Raw("SELECT * FROM car_vcard_order WHERE pay_no = ? and status <> '04'", payNo).Scan(&result).Error
-				}
-				
-				if err != nil {
-					log.Printf("Error querying database for ID %s: %v", orderNo, err)
-					continue
-				}
-				
-			}
-			
-			f.SetCellValue("Sheet1", fmt.Sprintf("M%d", i+1), result["product_name"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("N%d", i+1), 1)
-			f.SetCellValue("Sheet1", fmt.Sprintf("O%d", i+1), result["amount"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("P%d", i+1), result["pay_amount"])
-		} else if orderType == "GP" {
-			err := db.Db.Raw("SELECT *,case pro_id when 'PA001' then '平安专版水晶相框' when 'PA002' then '平安专版私定相册' when 'GS001' then '中国人寿专版水晶相框' when 'GS002' then '中国人寿专版时光相册' end as 'product_name' FROM car_order_gdpa WHERE order_no = ?", orderNo).Scan(&result).Error
-			if err != nil {
-				log.Printf("Error querying database for ID %s: %v", orderNo, err)
-				continue
-			}
-			f.SetCellValue("Sheet1", fmt.Sprintf("M%d", i+1), result["product_name"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("N%d", i+1), result["num"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("O%d", i+1), result["order_amount"])
-			f.SetCellValue("Sheet1", fmt.Sprintf("P%d", i+1), result["pay_amount"])
-		}
-		// 4. 更新Excel文档
-		// 假设我们要更新第三列
-
+	// 2. 分类收集订单数据
+	orderGroups, err := p.collectOrderGroups(rows)
+	if err != nil {
+		p.handleError(c, "收集订单数据失败", err)
+		return
 	}
 
-	// 5. 保存更新后的Excel文档
+	// 3. 批量查询各类订单
+	results, err := p.batchQueryOrders(orderGroups)
+	if err != nil {
+		p.handleError(c, "查询订单数据失败", err)
+		return
+	}
+
+	// 4. 更新Excel
+	if err := p.updateExcelWithResults(f, results); err != nil {
+		p.handleError(c, "更新Excel失败", err)
+		return
+	}
+
+	// 5. 保存文件
 	if err := f.SaveAs("output.xlsx"); err != nil {
-		log.Fatal(err)
+		p.handleError(c, "保存文件失败", err)
+		return
 	}
-	c.String(http.StatusOK, "OK")
+
+	c.String(http.StatusOK, "处理完成")
+}
+
+func (p *PayOrder) collectOrderGroups(rows [][]string) (map[string][]OrderData, error) {
+	orderGroups := make(map[string][]OrderData)
+
+	for i, row := range rows {
+		if i == 0 || len(row) <= 10 { // 跳过标题行和无效行
+			continue
+		}
+
+		orderNo := strings.TrimSpace(strings.ReplaceAll(row[10], "`", ""))
+		if orderNo == "" {
+			continue
+		}
+
+		// 处理特殊情况：订单号以"10"开头
+		payNo := ""
+		if orderNo[:2] == "10" && len(row) > 11 {
+			orderNo = strings.TrimSpace(strings.ReplaceAll(row[11], "`", ""))
+		} else if len(row) > 11 {
+			payNo = strings.TrimSpace(strings.ReplaceAll(row[11], "`", ""))
+		}
+
+		if orderNo == "" {
+			continue
+		}
+
+		orderType := orderNo[:2]
+		orderData := OrderData{
+			RowIndex: i + 1,
+			OrderNo:  orderNo,
+			PayNo:    payNo,
+		}
+
+		orderGroups[orderType] = append(orderGroups[orderType], orderData)
+	}
+
+	return orderGroups, nil
+}
+
+func (p *PayOrder) batchQueryOrders(orderGroups map[string][]OrderData) (map[string]QueryResult, error) {
+	results := make(map[string]QueryResult)
+	db := model.RDB[model.MASTER].Db
+
+	// 批量查询各类型订单
+	for orderType, orders := range orderGroups {
+		var orderNos []string
+		for _, order := range orders {
+			orderNos = append(orderNos, order.OrderNo)
+		}
+
+		var queryResults []QueryResult
+		switch orderType {
+		case OrderTypeYZ:
+			if err := db.Raw(`
+				SELECT order_no, pro_name as product_name, 1 as amount,
+				       total_amount as order_amount, pay_amount
+				FROM car_shop_yz_order_v 
+				WHERE order_no IN (?)
+			`, orderNos).Scan(&queryResults).Error; err != nil {
+				return nil, err
+			}
+
+		case OrderTypeDD, OrderTypeDA:
+			if err := db.Raw(`
+				SELECT order_no, product_name, amount,
+				       order_amount, pay_amount
+				FROM car_shop_dadi_order 
+				WHERE order_no IN (?)
+			`, orderNos).Scan(&queryResults).Error; err != nil {
+				return nil, err
+			}
+		case OrderTypeDS:
+			if err := db.Raw(`
+				SELECT split_no as order_no, group_concat(product_name) as product_name, sum(amount) as amount,
+				       sum(order_amount) as order_amount, sum(pay_amount) as pay_amount
+				FROM car_shop_dadi_order  
+				WHERE split_no IN (?)
+				GROUP BY split_no
+			`, orderNos).Scan(&queryResults).Error; err != nil {
+				return nil, err
+			}
+
+		case OrderTypeVC:
+			// VC类型需要特殊处理，先用订单号查询
+			if err := db.Raw(`
+				SELECT order_no, product_name, 1 as amount,
+				       amount as order_amount, pay_amount, pay_no
+				FROM car_vcard_order 
+				WHERE order_no IN (?)
+			`, orderNos).Scan(&queryResults).Error; err != nil {
+				return nil, err
+			}
+
+			// 收集未查到的订单，使用支付号再次查询
+			var missingOrders []OrderData
+			for _, order := range orders {
+				found := false
+				for _, result := range queryResults {
+					if result.OrderNo == order.OrderNo {
+						found = true
+						break
+					}
+				}
+				if !found && order.PayNo != "" {
+					missingOrders = append(missingOrders, order)
+				}
+			}
+
+			if len(missingOrders) > 0 {
+				var payNos []string
+				for _, order := range missingOrders {
+					payNos = append(payNos, order.PayNo)
+				}
+
+				var additionalResults []QueryResult
+				if err := db.Raw(`
+					SELECT order_no, product_name, 1 as amount,
+					       amount as order_amount, pay_amount, pay_no
+					FROM car_vcard_order 
+					WHERE pay_no IN (?) AND status <> '04'
+				`, payNos).Scan(&additionalResults).Error; err != nil {
+					return nil, err
+				}
+
+				queryResults = append(queryResults, additionalResults...)
+			}
+
+		case OrderTypeGP:
+			if err := db.Raw(`
+				SELECT o.order_no, 
+				       CASE o.pro_id 
+				           WHEN 'PA001' THEN '平安专版水晶相框'
+				           WHEN 'PA002' THEN '平安专版私定相册'
+				           WHEN 'GS001' THEN '中国人寿专版水晶相框'
+				           WHEN 'GS002' THEN '中国人寿专版时光相册'
+				           WHEN 'TP001' THEN '中国太平专版水晶相框'
+				       END as product_name,
+				       o.num as amount,
+				       o.order_amount,
+				       o.pay_amount
+				FROM car_order_gdpa o
+				WHERE order_no IN (?)
+			`, orderNos).Scan(&queryResults).Error; err != nil {
+				return nil, err
+			}
+
+		case OrderTypeZY:
+			if err := db.Raw(`
+				SELECT order_no, product_name, amount,
+				       order_amount, pay_amount
+				FROM car_shop_order_v 
+				WHERE order_no IN (?)
+			`, orderNos).Scan(&queryResults).Error; err != nil {
+				return nil, err
+			}
+		}
+
+		// 将查询结果存入map
+		for _, result := range queryResults {
+			results[result.OrderNo] = result
+		}
+	}
+
+	return results, nil
+}
+
+func (p *PayOrder) updateExcelWithResults(f *excelize.File, results map[string]QueryResult) error {
+	// 重新读取Excel以获取行信息
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		return err
+	}
+
+	for i, row := range rows {
+		if i == 0 || len(row) <= 10 {
+			continue
+		}
+
+		orderNo := strings.TrimSpace(strings.ReplaceAll(row[10], "`", ""))
+		if orderNo == "" {
+			continue
+		}
+
+		if orderNo[:2] == "10" && len(row) > 11 {
+			orderNo = strings.TrimSpace(strings.ReplaceAll(row[11], "`", ""))
+		}
+
+		if result, ok := results[orderNo]; ok {
+			rowIndex := i + 1
+			productName := result.ProductName
+			if productName == "" {
+				productName = result.ProName
+			}
+
+			amount := result.Amount
+			if amount == 0 {
+				amount = result.Num
+			}
+			if amount == 0 {
+				amount = 1
+			}
+
+			// 更新Excel单元格
+			f.SetCellValue("Sheet1", fmt.Sprintf("M%d", rowIndex), productName)
+			f.SetCellValue("Sheet1", fmt.Sprintf("N%d", rowIndex), amount)
+			f.SetCellValue("Sheet1", fmt.Sprintf("O%d", rowIndex), result.OrderAmount)
+			f.SetCellValue("Sheet1", fmt.Sprintf("P%d", rowIndex), result.PayAmount)
+		}
+	}
+
+	return nil
+}
+
+func (p *PayOrder) handleError(c *gin.Context, message string, err error) {
+	slog.Error(message, err)
+	c.String(http.StatusInternalServerError, message)
 }
