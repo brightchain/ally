@@ -1,5 +1,5 @@
 #!/bin/bash
-chmod +x ally
-ps -ef | grep ally | grep -v grep | awk '{print $2}' | xargs kill -9
+chmod +x h5
+ps -ef | grep h5 | grep -v grep | awk '{print $2}' | xargs kill -9
 
-nohup ./ally &
+nohup ./h5 &

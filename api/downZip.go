@@ -9,10 +9,12 @@ import (
 	"h5/pkg/goredis"
 	"h5/pkg/model"
 	"h5/utils"
+	"io"
 	"log/slog"
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -76,6 +78,7 @@ func PhotoOrderCy(c *gin.Context) {
 		c.String(200, "zip 压缩失败")
 		return
 	}
+	
 	for _, order := range data {
 		name := strings.ToLower(order.OrderNo)
 		fileName := models.FilePath + "/" + name + "/" + order.ProId + ".jpeg"
@@ -83,6 +86,7 @@ func PhotoOrderCy(c *gin.Context) {
 		if order.Remark != "" {
 			zName = order.Remark + " " + name + "+" + order.ProName + ".jpeg"
 		}
+
 		err = utils.AddFileToZip(zipWriter, fileName, zName)
 		if err != nil {
 			slog.Warn("压缩失败", err)
@@ -112,6 +116,61 @@ func PhotoOrderCy(c *gin.Context) {
 	goredis.Client.Set(c, md5str, zipName, 7*24*time.Hour)
 
 	c.String(200, zipName)
+}
+
+func MouseOrderDown(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit := ""
+	if page > 0 {
+		limit = fmt.Sprintf("%d,100", (page-1)*100)
+	}
+
+	// 获取其他参数
+	status, _ := strconv.Atoi(c.DefaultQuery("status", "1"))
+	sdate := c.DefaultQuery("sdate", "")
+	edate := c.DefaultQuery("edate", "")
+	name := c.DefaultQuery("name", "")
+	sign := c.DefaultQuery("sign", "")
+
+	if len(name) <= 0 {
+		c.String(200, "缺少参数！")
+		return
+	}
+	h := md5.New()
+	io.WriteString(h, name+"13687391951")
+	if fmt.Sprintf("%x", h.Sum(nil))!= sign {
+		c.String(200, "sign签名失败！")
+		return
+	}
+
+	// 构建 WHERE 条件
+	where := fmt.Sprintf("`status` = %d and company = ", status)
+
+	if sdate != "" && edate != "" {
+		where += fmt.Sprintf(" AND `c_time` >= '%s' AND `c_time` < '%s'", sdate, edate)
+	}
+
+	type Result struct {
+		Order_no        string `json:"order_no" tag:"订单编号"`
+		Ship_name       string `json:"ship_name" tag:"物流公司"`
+		Ship_no         string `json:"ship_no" tag:"物流单号"`
+		Contact        string `json:"contact" tag:"收货人"`
+		Mobile         string `json:"mobile" tag:"收货手机"`
+		Customer_info   string `json:"customer_info" tag:"客户姓名"`
+		Province         string `json:"province" tag:"省"`
+		City         string `json:"city" tag:"市"`
+		Area         string `json:"area" tag:"区"`
+		Address         string `json:"address" tag:"详细地址"`
+		Remark string `json:"remark" tag:"备注"`
+		C_time          string `json:"c_time" tag:"创建时间"`
+	}
+
+	var result []Result
+	db := model.RDB[model.MASTER]
+	sqlQuery := fmt.Sprintf("select order_no,contact,mobile,province,city,area,address,customer_info,c_time from car_order_shirt where %s limit %s",where,limit)
+	db.Db.Raw(sqlQuery).Find(&result)
+	utils.Down(result, "摆台订单", c)
+	
 }
 
 func Zip(c *gin.Context) {
