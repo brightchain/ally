@@ -11,6 +11,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -165,8 +166,15 @@ func (d *DownOrder) MouseOrderDown(c *gin.Context) {
 	} else {
 		fmt.Println("No orders found to update")
 	}
-	c.FileAttachment(zipName, name+".zip")
+	filename := filepath.Base(zipName)
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Header("Content-Type", "application/octet-stream")
 
+	// 发送文件
+	c.File(zipName)
+	
 }
 
 // AddChineseProvinceSuffix 给省份名称添加后缀
