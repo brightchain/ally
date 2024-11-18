@@ -95,7 +95,7 @@ func (d *DownOrder) MouseOrderDown(c *gin.Context) {
 	defer newZipFile.Close()
 	zipWriter := zip.NewWriter(newZipFile)
 	defer zipWriter.Close()
-	orderDirectory := "E:/code/sharelive/src/static/upload/tshirt/order"
+	orderDirectory := "/home/www/car/static/upload/tshirt/order"
 	var orderNos []string
 	for k, v := range result {
 		orderNos = append(orderNos, v.Order_no)
