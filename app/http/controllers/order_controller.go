@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"ally/pkg/model"
 	"fmt"
+	"h5/pkg/model"
 	"log/slog"
 	"net/http"
 	"strings"

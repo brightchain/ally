@@ -1,6 +1,6 @@
 package bootstrap
 
-import "ally/pkg/logger"
+import "h5/pkg/logger"
 
 func SetupSlog() {
 	logger.Initialize()

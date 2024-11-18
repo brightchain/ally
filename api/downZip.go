@@ -1,14 +1,14 @@
 package api
 
 import (
-	"ally/app/http/models"
-	"ally/pkg/goredis"
-	"ally/pkg/model"
-	"ally/utils"
 	"archive/zip"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"h5/app/http/models"
+	"h5/pkg/goredis"
+	"h5/pkg/model"
+	"h5/utils"
 	"log/slog"
 	"math/rand"
 	"os"
@@ -144,7 +144,6 @@ func Zip(c *gin.Context) {
 
 	defer zipWriter.Close()
 	c.String(200, "/public/storage/1.zip")
-
 }
 
 func Redis(c *gin.Context) {

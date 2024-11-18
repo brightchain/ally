@@ -1,5 +1,5 @@
 app:
-  name: ally  
+  name: h5  
   port: 8080  # 服务运行端口
   env: dev  # 当前环境，用以区分多环境
   debug: true # 是否进入调试模式

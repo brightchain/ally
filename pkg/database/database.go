@@ -1,9 +1,9 @@
 package database
 
 import (
-	"ally/pkg/config"
-	"ally/pkg/logger"
 	"database/sql"
+	"h5/pkg/config"
+	"h5/pkg/logger"
 	"time"
 
 	"github.com/go-sql-driver/mysql"

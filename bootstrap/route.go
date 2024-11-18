@@ -1,8 +1,8 @@
 package bootstrap
 
 import (
-	"ally/pkg/route"
-	"ally/routers"
+	"h5/pkg/route"
+	"h5/routers"
 
 	"github.com/gin-gonic/gin"
 )

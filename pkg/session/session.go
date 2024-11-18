@@ -1,8 +1,8 @@
 package session
 
 import (
-	"ally/pkg/config"
-	"ally/pkg/logger"
+	"h5/pkg/config"
+	"h5/pkg/logger"
 	"net/http"
 
 	"github.com/gorilla/sessions"

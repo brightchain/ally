@@ -1,9 +1,9 @@
 package model
 
 import (
-	"ally/pkg/config"
 	"errors"
 	"fmt"
+	"h5/pkg/config"
 	"log"
 	"log/slog"
 	"os"
@@ -30,7 +30,7 @@ var (
 )
 
 func InitDb() {
-	for k:= range config.GetStringMap("databases") {
+	for k := range config.GetStringMap("databases") {
 		connByConf(k)
 	}
 

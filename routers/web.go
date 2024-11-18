@@ -1,8 +1,8 @@
 package routers
 
 import (
-	"ally/app/http/controllers"
-	"ally/app/http/middleware"
+	"h5/app/http/controllers"
+	"h5/app/http/middleware"
 
 	"github.com/gin-gonic/gin"
 )

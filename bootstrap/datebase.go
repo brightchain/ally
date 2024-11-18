@@ -1,6 +1,6 @@
 package bootstrap
 
-import database "ally/pkg/database"
+import database "h5/pkg/database"
 
 func SetupDatabase() {
 	database.Initialize()

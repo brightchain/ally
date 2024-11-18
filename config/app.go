@@ -1,13 +1,13 @@
 // Package config 应用的配置
 package config
 
-import "ally/pkg/config"
+import "h5/pkg/config"
 
 func init() {
 	config.Add("app", config.StrMap{
 
 		// 应用名称，暂时没有使用到
-		"name": config.Env("app.name", "ally"),
+		"name": config.Env("app.name", "h5"),
 
 		// 当前环境，用以区分多环境
 		"env": config.Env("app.env", "production"),

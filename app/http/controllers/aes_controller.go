@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"ally/pkg/config"
-	"ally/pkg/model"
-	"ally/utils/crypto"
 	"encoding/json"
 	"fmt"
+	"h5/pkg/config"
+	"h5/pkg/model"
+	"h5/utils/crypto"
 	"log"
 	"log/slog"
 	"strings"

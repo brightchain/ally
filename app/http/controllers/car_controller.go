@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"ally/app/http/models"
-	"ally/pkg/config"
-	"ally/pkg/model"
 	"encoding/json"
 	"fmt"
+	"h5/app/http/models"
+	"h5/pkg/config"
+	"h5/pkg/model"
 	"io"
 	"log"
 	"net/http"

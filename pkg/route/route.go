@@ -1,7 +1,7 @@
 package route
 
 import (
-	"ally/pkg/config"
+	"h5/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )

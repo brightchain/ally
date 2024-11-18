@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"ally/pkg/model"
-	"ally/utils"
 	"encoding/json"
 	"fmt"
+	"h5/pkg/model"
+	"h5/utils"
 	"log/slog"
 	"strconv"
 
@@ -204,28 +204,27 @@ func (*ExportExcel) ShTp(c *gin.Context) {
 
 func (*ExportExcel) FjTp(c *gin.Context) {
 	type Result struct {
-		OrderNo            string `json:"order_no" tag:"订单编号"`
-		Name            string `json:"name" tag:"产品名称"`
-		Num            string `json:"num" tag:"购买数量"`
-		Order_amount              string `json:"order_amount" tag:"订单金额"`
+		OrderNo      string `json:"order_no" tag:"订单编号"`
+		Name         string `json:"name" tag:"产品名称"`
+		Num          string `json:"num" tag:"购买数量"`
+		Order_amount string `json:"order_amount" tag:"订单金额"`
 		PayNo        string `json:"pay_no" tag:"支付单号"`
-		PayAt     string `json:"pay_at" tag:"支付时间"`
-		Mobile          string `json:"mobile" tag:"手机号"`
-		Work_num        string `json:"work_num" tag:"业务员工号"`
-		Name1           string `json:"name1" tag:"业务员姓名"`
-		Contact           string `json:"contact" tag:"中支"`
-		Organ           string `json:"organ" tag:"营服"`
-		Status          string `json:"status" tag:"订单状态"`
-		C_time          string `json:"c_time" tag:"创建时间"`
+		PayAt        string `json:"pay_at" tag:"支付时间"`
+		Mobile       string `json:"mobile" tag:"手机号"`
+		Work_num     string `json:"work_num" tag:"业务员工号"`
+		Name1        string `json:"name1" tag:"业务员姓名"`
+		Contact      string `json:"contact" tag:"中支"`
+		Organ        string `json:"organ" tag:"营服"`
+		Status       string `json:"status" tag:"订单状态"`
+		C_time       string `json:"c_time" tag:"创建时间"`
 	}
 
 	var result []Result
 
 	sqlQuery := "select a.order_no, '福建太平10寸照片摆台' as name,a.num,a.order_amount,a.pay_no,if(a.pay_at,FROM_UNIXTIME(a.pay_at),'') as 'pay_at',case a.status when 0 then '未付款' when 1 then '已付款' when 2 then '已完成' when -1 then '已取消' end as 'status',b.name as 'name1',b.mobile,b.contact,b.organ,b.work_num,FROM_UNIXTIME(a.c_time) as 'c_time'  from car_order_gdpa a LEFT JOIN car_order_photo_agent b on (a.uid = b.uid and b.company = 30) where a.pro_id = 'TP001' "
-	
+
 	db := model.RDB[model.MASTER]
 	db.Db.Raw(sqlQuery).Find(&result)
-
 
 	utils.Down(result, "福建太平摆台购买", c)
 }

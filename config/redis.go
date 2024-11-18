@@ -1,6 +1,6 @@
 package config
 
-import "ally/pkg/config"
+import "h5/pkg/config"
 
 func init() {
 	config.Add("redis", config.StrMap{

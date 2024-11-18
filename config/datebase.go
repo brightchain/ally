@@ -1,7 +1,7 @@
 package config
 
 import (
-	"ally/pkg/config"
+	"h5/pkg/config"
 )
 
 func init() {

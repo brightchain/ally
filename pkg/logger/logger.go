@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"ally/pkg/config"
+	"h5/pkg/config"
 	"io"
 	"log/slog"
 	"os"

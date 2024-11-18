@@ -1,6 +1,6 @@
 package bootstrap
 
-import "ally/pkg/model"
+import "h5/pkg/model"
 
 func SetupModel() {
 	model.InitDb()
