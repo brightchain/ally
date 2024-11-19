@@ -75,7 +75,7 @@ func (d *DownOrder) MouseOrderDown(c *gin.Context) {
 	sqlQuery := fmt.Sprintf("select order_no,contact,mobile,province,city,area,address,customer_info,ship_name,ship_no,c_time from car_order_tshirt where %s limit %s", where, limit)
 	fmt.Print(sqlQuery)
 	db.Db.Raw(sqlQuery).Find(&result)
-	if result == nil {
+	if len(result) == 0 {
 		c.String(200, "查询失败！")
 		return
 	}
