@@ -158,7 +158,7 @@ func (d *DownOrder) MouseOrderDown(c *gin.Context) {
 		db.Db.Model(&models.CarOrderTshirt{}).
 			Where("order_no IN ?", orderNos).
 			Updates(map[string]interface{}{
-				"status":    2,
+				"status":    4,
 				"send_time": currentTimestamp,
 			})
 

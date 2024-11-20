@@ -15,6 +15,7 @@ func RegisterWebRouters(r *gin.Engine) {
 	r.GET("/index", i.Index)
 	dir := new(controllers.DirectoryClear)
 	r.GET("/photo-clear", dir.PhotoDirClear)
+	r.GET("/photo-month", dir.PhotoDirMonth)
 	r.GET("/album-clear", dir.AlbumDirClear)
 	r.GET("/calendar-clear", dir.CalendarDirClear)
 	r.GET("/tshirt-clear", dir.TshirtDirClear)

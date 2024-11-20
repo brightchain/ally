@@ -32,6 +32,27 @@ func (*DirectoryClear) PhotoDirClear(c *gin.Context) {
 	c.String(http.StatusOK, "OK")
 }
 
+func (*DirectoryClear) PhotoDirMonth(c *gin.Context) {
+	dirPath := "/home/www/car/static/upload/photo/order"
+	duration := time.Hour * 24 * 30 * 3
+
+	err := deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+	//清空临时文件
+	dirPath = "/home/www/car/static/upload/photo/temp"
+	duration = time.Hour * 24 * 30
+	err = deleteOldDir(dirPath, duration)
+
+	if err != nil {
+		c.String(http.StatusOK, err.Error())
+	}
+
+	c.String(http.StatusOK, "OK")
+}
+
 func (*DirectoryClear) AlbumDirClear(c *gin.Context) {
 	dirPath := "/home/www/car/static/upload/album/order"
 	duration := time.Hour * 24 * 30 * 6
