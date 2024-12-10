@@ -53,6 +53,9 @@ func RegisterWebRouters(r *gin.Engine) {
 
 	down := new(controllers.DownOrder)
 	r.GET("/mousedown", down.MouseOrderDown)
+
+	activity := new(controllers.Activity)
+	r.GET("/activity", activity.UserReset)
 	
 
 }
