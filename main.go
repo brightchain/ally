@@ -1,15 +1,15 @@
 package main
 
 import (
-	"ally/bootstrap"
-	"ally/config"
-	"ally/pkg/route"
+	"h5/bootstrap"
+	"h5/config"
+	"h5/pkg/route"
 	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
-func init(){
+func init() {
 	config.Initialize()
 }
 func main() {

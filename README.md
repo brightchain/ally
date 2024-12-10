@@ -1,4 +1,4 @@
-## Ally - 基于gin开发的web服务框架
+## h5 - 基于gin开发的web服务框架
 
 ## 主要功能
 - excel数据导出
@@ -10,13 +10,13 @@
 - 后台管理功能 开发中...
 
 ## Installation
-- 下载源码：git clone https://github.com/brightchain/ally.git
+- 下载源码：git clone https://github.com/brightchain/h5.git
 - 下载依赖：go mod tidy
 - 运行项目：go run main.go
-- 编译项目：go build -o ally
+- 编译项目：go build -o h5
 
 ## 服务重启
-- 进入当前目录：cd ally
+- 进入当前目录：cd h5
 - 运行命令: ./server.sh
 
 ## Configuration
