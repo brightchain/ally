@@ -56,6 +56,7 @@ func RegisterWebRouters(r *gin.Engine) {
 
 	activity := new(controllers.Activity)
 	r.GET("/activity", activity.UserReset)
+	r.GET("/activity_cancel", activity.CancelOrder)
 	
 
 }
