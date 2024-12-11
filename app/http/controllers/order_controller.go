@@ -103,7 +103,8 @@ func (p *PayOrder) collectOrderGroups(rows [][]string) (map[string][]OrderData, 
 
 		// 处理特殊情况：订单号以"10"开头
 		payNo := ""
-		if orderNo[:2] == "10" && len(row) > 11 {
+		
+		if (orderNo[:2] == "10" || orderNo[:2] == "wx") && len(row) > 11 {
 			orderNo = strings.TrimSpace(strings.ReplaceAll(row[11], "`", ""))
 		} else if len(row) > 11 {
 			payNo = strings.TrimSpace(strings.ReplaceAll(row[11], "`", ""))
@@ -270,7 +271,7 @@ func (p *PayOrder) updateExcelWithResults(f *excelize.File, results map[string]Q
 			continue
 		}
 
-		if orderNo[:2] == "10" && len(row) > 11 {
+		if (orderNo[:2] == "10" || orderNo[:2] == "wx") && len(row) > 11 {
 			orderNo = strings.TrimSpace(strings.ReplaceAll(row[11], "`", ""))
 		}
 
