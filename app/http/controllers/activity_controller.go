@@ -226,10 +226,11 @@ func exportToExcel(orders []ExportOrder) error {
 	// 写入数据
 	for row, order := range orders {
 		data := []interface{}{
-			order.AgentName, order.AgentMobile, order.AgentCode,
-			 order.BranchName,
+			order.AgentName, order.AgentMobile,
+			order.AgentOrgCode, order.BranchName,
 			order.CustomerName, order.CustomerMobile, order.CustomerAddress,
-			order.OrderNo, order.OrderTime,
+			order.PrizeName, order.PrizeID, order.CouponID,
+			order.LotteryTime,
 		}
 		for col, value := range data {
 			cell, _ := excelize.CoordinatesToCellName(col+1, row+2)
@@ -238,7 +239,7 @@ func exportToExcel(orders []ExportOrder) error {
 	}
 
 	// 保存文件
-	filename := fmt.Sprintf("英大订单取消%s.xlsx", time.Now().Format("20060102"))
+	filename := fmt.Sprintf("英大重置权益%s.xlsx", time.Now().Format("20060102 15"))
 	return f.SaveAs(filename)
 }
 
@@ -368,11 +369,10 @@ func exportOrderToExcel(orders []ExportOrder) error {
 	// 写入数据
 	for row, order := range orders {
 		data := []interface{}{
-			order.AgentName, order.AgentMobile,
-			order.AgentOrgCode, order.BranchName,
+			order.AgentName, order.AgentMobile, order.AgentCode,
+			order.BranchName,
 			order.CustomerName, order.CustomerMobile, order.CustomerAddress,
-			order.PrizeName, order.PrizeID, order.CouponID,
-			order.LotteryTime,
+			order.OrderNo, order.OrderTime,
 		}
 		for col, value := range data {
 			cell, _ := excelize.CoordinatesToCellName(col+1, row+2)
@@ -381,7 +381,7 @@ func exportOrderToExcel(orders []ExportOrder) error {
 	}
 
 	// 保存文件
-	filename := fmt.Sprintf("order_export_%s.xlsx", time.Now().Format("20060102_150405"))
+	filename := fmt.Sprintf("英大取消订单%s.xlsx", time.Now().Format("20060102"))
 	return f.SaveAs(filename)
 }
 
