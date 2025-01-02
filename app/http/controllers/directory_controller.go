@@ -34,7 +34,7 @@ func (*DirectoryClear) PhotoDirClear(c *gin.Context) {
 
 func (*DirectoryClear) PhotoDirMonth(c *gin.Context) {
 	dirPath := "/home/www/car/static/upload/photo/order"
-	duration := time.Hour * 24 * 30 * 3
+	duration := time.Hour * 24 * 30 * 6
 
 	err := deleteOldDir(dirPath, duration)
 

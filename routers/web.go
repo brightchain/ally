@@ -32,6 +32,7 @@ func RegisterWebRouters(r *gin.Engine) {
 		exGroup.GET("/ydln", export.Ydln)
 		exGroup.GET("/shtp", export.ShTp)
 		exGroup.GET("/fjtp", export.FjTp)
+		exGroup.GET("/nyorder", export.NyOrder)
 
 	}
 
@@ -39,6 +40,7 @@ func RegisterWebRouters(r *gin.Engine) {
 	r.POST("/aes/aes", aes.Aes)
 	r.POST("/aes/encrypt", aes.Encrypt)
 	r.POST("/aes/dow", aes.Down)
+	r.GET("/rsa", aes.RsaDecrypt)
 	car := controllers.Car{}
 	r.GET("/car", car.Index)
 	r.GET("/car_type", car.CarModel)
@@ -57,6 +59,5 @@ func RegisterWebRouters(r *gin.Engine) {
 	activity := new(controllers.Activity)
 	r.GET("/activity", activity.UserReset)
 	r.GET("/activity_cancel", activity.CancelOrder)
-	
 
 }

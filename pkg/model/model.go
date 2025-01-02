@@ -44,7 +44,7 @@ func connByConf(key string) {
 	}
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxOpenConns(50)
-	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxIdleConns(2)
 	sqlDB.SetConnMaxLifetime(5 * time.Minute)
 	rdb := &RDBManager{
 		Db:     db,

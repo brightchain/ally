@@ -425,3 +425,26 @@ func (*ExportExcel) Smwj(c *gin.Context) {
 
 	utils.Down(result, "问卷调查", c)
 }
+
+func (*ExportExcel) NyOrder(c *gin.Context) {
+	type Result struct {
+		Serial_no    string `json:"serial_no" tag:"流水号"`
+		Pro_code     string `json:"pro_code" tag:"产品编码"`
+		Name         string `json:"name" tag:"产品名称"`
+		Thd_code     string `json:"thd_code" tag:"用户id"`
+		Start_time   string `json:"start_time" tag:"权益开始时间"`
+		End_time     string `json:"end_time" tag:"权益结束时间"`
+		Org_code     string `json:"org_code" tag:"机构代码"`
+		Org_name     string `json:"org_name" tag:"机构名称"`
+		Status       string `json:"status" tag:"状态"`
+		C_time      string `json:"c_time" tag:"创建时间"`
+	}
+
+	var result []Result
+	sqlQuery := "select a.serial_no as 'serial_no',a.pro_code as 'pro_code',b.`name` as 'name',a.thd_code as 'thd_code',a.start_time as 'start_time',a.end_time as 'end_time',org_code as 'org_code',org_name as 'org_name',case a.status when 1 then '已激活' when 2 then '已使用'when 3 then '已激活' when -1 then '已撤销' end as 'status',FROM_UNIXTIME(c_time) as 'c_time'  from car_nongyin_coupon_list a LEFT JOIN car_api_product b on a.pro_code = b.code  "
+
+	db := model.RDB[model.MASTER]
+	db.Db.Raw(sqlQuery).Find(&result)
+
+	utils.Down(result, "农业人寿客户生日礼", c)
+}
