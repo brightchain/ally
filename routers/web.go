@@ -33,6 +33,7 @@ func RegisterWebRouters(r *gin.Engine) {
 		exGroup.GET("/shtp", export.ShTp)
 		exGroup.GET("/fjtp", export.FjTp)
 		exGroup.GET("/nyorder", export.NyOrder)
+		exGroup.GET("/hntborder", export.HntbOrder)
 
 	}
 

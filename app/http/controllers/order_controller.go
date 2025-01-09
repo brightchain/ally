@@ -20,6 +20,7 @@ const (
 	OrderTypeVC = "VC"
 	OrderTypeGP = "GP"
 	OrderTypeZY = "ZY"
+	OrderTypeCA = "CA"
 )
 
 // OrderData 存储订单基础信息
@@ -166,6 +167,15 @@ func (p *PayOrder) batchQueryOrders(orderGroups map[string][]OrderData) (map[str
 				FROM car_shop_dadi_order  
 				WHERE split_no IN (?)
 				GROUP BY split_no
+			`, orderNos).Scan(&queryResults).Error; err != nil {
+				return nil, err
+			}
+		case OrderTypeCA:
+			if err := db.Raw(`
+				SELECT order_no as order_no, '台历' as product_name, 1 as amount,
+				       total_amount as order_amount, pay_amount as pay_amount
+				FROM car_order_calendar  
+				WHERE order_no IN (?)
 			`, orderNos).Scan(&queryResults).Error; err != nil {
 				return nil, err
 			}

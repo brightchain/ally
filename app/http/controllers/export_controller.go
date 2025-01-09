@@ -428,16 +428,16 @@ func (*ExportExcel) Smwj(c *gin.Context) {
 
 func (*ExportExcel) NyOrder(c *gin.Context) {
 	type Result struct {
-		Serial_no    string `json:"serial_no" tag:"流水号"`
-		Pro_code     string `json:"pro_code" tag:"产品编码"`
-		Name         string `json:"name" tag:"产品名称"`
-		Thd_code     string `json:"thd_code" tag:"用户id"`
-		Start_time   string `json:"start_time" tag:"权益开始时间"`
-		End_time     string `json:"end_time" tag:"权益结束时间"`
-		Org_code     string `json:"org_code" tag:"机构代码"`
-		Org_name     string `json:"org_name" tag:"机构名称"`
-		Status       string `json:"status" tag:"状态"`
-		C_time      string `json:"c_time" tag:"创建时间"`
+		Serial_no  string `json:"serial_no" tag:"流水号"`
+		Pro_code   string `json:"pro_code" tag:"产品编码"`
+		Name       string `json:"name" tag:"产品名称"`
+		Thd_code   string `json:"thd_code" tag:"用户id"`
+		Start_time string `json:"start_time" tag:"权益开始时间"`
+		End_time   string `json:"end_time" tag:"权益结束时间"`
+		Org_code   string `json:"org_code" tag:"机构代码"`
+		Org_name   string `json:"org_name" tag:"机构名称"`
+		Status     string `json:"status" tag:"状态"`
+		C_time     string `json:"c_time" tag:"创建时间"`
 	}
 
 	var result []Result
@@ -447,4 +447,31 @@ func (*ExportExcel) NyOrder(c *gin.Context) {
 	db.Db.Raw(sqlQuery).Find(&result)
 
 	utils.Down(result, "农业人寿客户生日礼", c)
+}
+
+func (*ExportExcel) HntbOrder(c *gin.Context) {
+	type Result struct {
+		Order_no    string `json:"order_no" tag:"订单号"`
+		Name         string `json:"name" tag:"产品名称"`
+		Num          string `json:"num" tag:"产品数量"`
+		Price        string `json:"price" tag:"产品价格"`
+		Organ        string `json:"organ" tag:"机构名称"`
+		Work_num     string `json:"work_num" tag:"工号"`
+		Contact      string `json:"contact" tag:"收货人"`
+		Mobile       string `json:"mobile" tag:"收货手机"`
+		Address      string `json:"address" tag:"收货地址"`
+		Order_amount string `json:"order_amount" tag:"订单金额"`
+		Pay_amount   string `json:"pay_amount" tag:"支付金额"`
+		Pay_at       string `json:"pay_at" tag:"支付时间"`
+		Status       string `json:"status" tag:"订单状态"`
+		C_time       string `json:"c_time" tag:"创建时间"`
+	}
+
+	var result []Result
+	sqlQuery := "select a.order_no,case c.pro_id when 1 then '日进斗巾厨房湿巾' when 2 then '有两把刷子（天然竹制锅刷）' when 3 then '富得流油厨房清洁套装' when 4 then '一锤定赢养生锤' when 5 then '照片摆台' when 6 then '艾护全身 福到万家 灸贴套装' when 7 then '聚宝罐五件套' when 8 then '法兰绒时尚午睡毯' when 9 then '金龙鱼伴手礼盒' end 'name',c.num 'num',c.price,organ ,work_num ,a.contact ,a.mobile ,concat(a.province,a.city,a.area,a.address) 'address',total_amount 'order_amount' ,c.total_amount 'pay_amount' ,if(pay_at>0,FROM_UNIXTIME(pay_at,'%Y-%m-%d %h:%i:%s'),'') 'pay_at',case status when 0 then '未支付' when 1 then '已付款' end 'status',FROM_UNIXTIME(a.c_time,'%Y-%m-%d %h:%i:%s') 'c_time'  from cs_mall_hntb_order a LEFT JOIN cs_mall_hntb_agent b on a.uid = b.id LEFT JOIN cs_mall_hntb_order_item c on a.order_no = c.order_no WHERE a.status not in(-1,0)"
+
+	db := model.RDB["db3"]
+	db.Db.Raw(sqlQuery).Find(&result)
+
+	utils.Down(result, "湖南太保礼品增订", c)
 }
